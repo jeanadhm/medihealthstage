@@ -1,0 +1,38 @@
+/* Variables pour le thème clair */
+:root {
+    --background-color: #f9f9f9;
+    --text-color: #333;
+    --navbar-bg-color: #fff;
+    --badge-bg-color: red;
+}
+
+/* Variables pour le thème sombre */
+.dark {
+    --background-color: #333;
+    --text-color: #f9f9f9;
+    --navbar-bg-color: #444;
+    --badge-bg-color: #f00;
+}
+
+/* Application des variables aux éléments */
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.navbar {
+    background-color: var(--navbar-bg-color);
+}
+
+/* Notification Badge */
+.notification-badge {
+    background-color: var(--badge-bg-color); /* Utilise la couleur de fond du badge de notification */
+    color: var(--text-color); /* Couleur du texte du badge de notification */
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
