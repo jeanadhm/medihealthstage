@@ -6,9 +6,10 @@ import DoctorSidebar from "components/Sidebar/DoctorSidebar";
 
 // views
 import PatientsList from "views/doctor/patients";
+import AppointmentList from "views/doctor/rdvall";
 import AnalysisForm from "views/doctor/analyses";
 import AppointmentForm from "views/doctor/rdvdoctor";
-import DoctorChat from "views/doctor/consultations";
+import Chat from "views/doctor/consultations";
 import Allanalyses from "views/doctor/allanalyses";
 
 export default function Doctor() {
@@ -21,8 +22,9 @@ export default function Doctor() {
             {/* Chemins relatifs pour les sous-routes */}
             <Route path="patients" element={<PatientsList />} />
             <Route path="analyses" element={<AnalysisForm />} />
-            <Route path="consultations" element={<DoctorChat />} />
+            <Route path="consultations" element={<Chat />} />
             <Route path="rdv" element={<AppointmentForm />} />
+            <Route path="rdvs" element={<AppointmentList />} />
             <Route path="analyses/all" element={<Allanalyses />} />
             
             {/* Redirection pour les chemins invalides */}

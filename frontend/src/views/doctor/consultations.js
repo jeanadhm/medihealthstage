@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const Doctorchat = () => {
+const Chat = () => {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const messagesEndRef = useRef(null);
@@ -24,7 +24,9 @@ const Doctorchat = () => {
     useEffect(scrollToBottom, [messages]);
 
     return (
+        
         <div className="chat-container" style={styles.chatContainer}>
+            <br /><br /><br /><br /><br /><br />
             <div className="messages" style={styles.messages}>
                 {messages.map((msg, index) => (
                     <div key={index} className="message" style={styles.message}>
@@ -50,12 +52,12 @@ const Doctorchat = () => {
 
 const styles = {
     chatContainer: {
-        
         display: 'flex',
         flexDirection: 'column',
-        height: '100%',
-        width: '100%',
-        backgroundColor: '#37474F',
+        height: '400px',
+        width: '300px',
+        border: '1px solid #ccc',
+        borderRadius: '8px',
         padding: '10px',
         boxSizing: 'border-box',
     },
@@ -63,22 +65,19 @@ const styles = {
         flex: 1,
         overflowY: 'auto',
         marginBottom: '10px',
-        backgroundColor: '#607D8B', // bluegray-500
-        padding: '10px',
-        borderRadius: '8px',
     },
     message: {
         marginBottom: '10px',
         padding: '5px',
         borderRadius: '5px',
-        backgroundColor: '#CFD8DC', // bluegray-100 for contrast
+        backgroundColor: '#f1f1f1',
     },
     text: {
         margin: 0,
     },
     timestamp: {
         fontSize: '0.75em',
-        color: '#455A64',
+        color: '#888',
         textAlign: 'right',
     },
     inputContainer: {
@@ -86,20 +85,19 @@ const styles = {
     },
     input: {
         flex: 1,
-        padding: '10px',
+        padding: '5px',
         borderRadius: '5px',
-        border: '1px solid #B0BEC5',
-        marginRight: '10px',
-        backgroundColor: '#ECEFF1', // Slightly lighter for the input background
+        border: '1px solid #ccc',
+        marginRight: '5px',
     },
     button: {
-        padding: '10px 20px',
+        padding: '5px 10px',
         borderRadius: '5px',
         border: 'none',
-        backgroundColor: '#37474F', // bluegray-800
+        backgroundColor: '#007BFF',
         color: 'white',
         cursor: 'pointer',
     }
 };
 
-export default Doctorchat;
+export default Chat;

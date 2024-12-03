@@ -31,7 +31,7 @@ const AnalysisForm = () => {
         setPatients(response.data);
       })
       .catch(error => {
-        console.error('There was an error fetching the patients!', error);
+        console.error('Erreur lors de la récupération des patients !', error);
       });
   }, []);
 
@@ -44,9 +44,31 @@ const AnalysisForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.post('http://127.0.0.1:8000/analyses/save_analysis/', formData)
+
+    // Déterminer l'URL selon le type d'analyse
+    let apiUrl = '';
+    switch (formData.analysisType) {
+      case 'common':
+        apiUrl = 'http://127.0.0.1:8000/analyses/common/';
+        break;
+      case 'cholesterol':
+        apiUrl = 'http://127.0.0.1:8000/analyses/cholesterol/';
+        break;
+      case 'ist':
+        apiUrl = 'http://127.0.0.1:8000/analyses/ist/';
+        break;
+      case 'diabetes':
+        apiUrl = 'http://127.0.0.1:8000/analyses/diabetes/';
+        break;
+      default:
+        alert("Veuillez sélectionner un type d'analyse.");
+        return;
+    }
+
+    // Envoyer les données au backend
+    axios.post(apiUrl, formData)
       .then(response => {
-        setSuccessMessage(response.data.message);
+        setSuccessMessage(response.data.message || 'Analyse ajoutée avec succès !');
         setFormData({
           patient: '',
           red_blood_cells: '',
@@ -68,7 +90,7 @@ const AnalysisForm = () => {
         });
       })
       .catch(error => {
-        console.error(error);
+        console.error('Erreur lors de la soumission du formulaire :', error);
       });
   };
 
@@ -107,9 +129,6 @@ const AnalysisForm = () => {
       borderRadius: '4px',
       cursor: 'pointer'
     },
-    buttonHover: {
-      backgroundColor: '#0056b3'
-    },
     successMessage: {
       color: 'green',
       fontWeight: 'bold',
@@ -124,7 +143,7 @@ const AnalysisForm = () => {
       <label style={styles.label}>
         Patient:
         <select name="patient" value={formData.patient} onChange={handleChange} style={styles.input}>
-          <option value="">Select a patient</option>
+          <option value="">Sélectionner un patient</option>
           {patients.map((patient) => (
             <option key={patient.id} value={patient.id}>
               {patient.nom} {patient.prenom}
@@ -133,15 +152,16 @@ const AnalysisForm = () => {
         </select>
       </label>
       <label style={styles.label}>
-        Type analyse:
+        Type d'analyse:
         <select name="analysisType" value={formData.analysisType} onChange={handleChange} style={styles.input}>
-          <option value="">Select</option>
+          <option value="">Sélectionner</option>
           <option value="common">Courant</option>
-          <option value="cholesterol">Cholesterol</option>
+          <option value="cholesterol">Cholestérol</option>
           <option value="ist">IST</option>
-          <option value="diabetes">Diabetes</option>
+          <option value="diabetes">Diabète</option>
         </select>
       </label>
+      {/* Champs dynamiques basés sur le type d'analyse */}
       {formData.analysisType === 'common' && (
         <>
           <label style={styles.label}>
@@ -157,11 +177,11 @@ const AnalysisForm = () => {
             <input type="number" name="platelets" value={formData.platelets} onChange={handleChange} style={styles.input} />
           </label>
           <label style={styles.label}>
-            Hemoglobines:
+            Hémoglobine:
             <input type="number" name="hemoglobin" value={formData.hemoglobin} onChange={handleChange} style={styles.input} />
           </label>
           <label style={styles.label}>
-            Hematocrites:
+            Hématocrites:
             <input type="number" name="hematocrit" value={formData.hematocrit} onChange={handleChange} style={styles.input} />
           </label>
         </>
@@ -169,7 +189,7 @@ const AnalysisForm = () => {
       {formData.analysisType === 'cholesterol' && (
         <>
           <label style={styles.label}>
-            Total Cholesterol:
+            Cholestérol total:
             <input type="number" name="chol_total" value={formData.chol_total} onChange={handleChange} style={styles.input} />
           </label>
           <label style={styles.label}>
@@ -181,7 +201,7 @@ const AnalysisForm = () => {
             <input type="number" name="chol_ldl" value={formData.chol_ldl} onChange={handleChange} style={styles.input} />
           </label>
           <label style={styles.label}>
-            Triglycerides:
+            Triglycérides:
             <input type="number" name="chol_triglycerides" value={formData.chol_triglycerides} onChange={handleChange} style={styles.input} />
           </label>
         </>
@@ -215,10 +235,10 @@ const AnalysisForm = () => {
         <input type="date" name="date" value={formData.date} onChange={handleChange} style={styles.input} />
       </label>
       <label style={styles.label}>
-        Result Positive:
+        Résultat positif:
         <input type="checkbox" name="result_positive" checked={formData.result_positive} onChange={(e) => setFormData({ ...formData, result_positive: e.target.checked })} style={styles.checkbox} />
       </label>
-      <button type="submit" style={styles.button}>Submit</button>
+      <button type="submit" style={styles.button}>Soumettre</button>
     </form>
   );
 };

@@ -80,7 +80,7 @@ export default function DoctorSidebar() {
                 {openSubMenu === "appointments" && (
                   <motion.ul className="ml-4" initial={{ maxHeight: 0 }} animate={{ maxHeight: 100 }} transition={{ duration: 0.3 }}>
                     <li>
-                      <Link className="sub-menu-item text-xs uppercase py-2 block" to="/doctor/rdv/view">
+                      <Link className="sub-menu-item text-xs uppercase py-2 block" to="/doctor/rdvs/">
                         <i className="fas fa-eye mr-2 text-sm"></i> Voir les rendez-vous
                       </Link>
                     </li>

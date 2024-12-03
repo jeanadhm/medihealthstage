@@ -1,24 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, Typography, MenuItem, Paper } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { DatePicker, TimePicker } from '@mui/x-date-pickers';
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  MenuItem,
+  Paper,
+} from "@mui/material";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 
 function AppointmentForm() {
   const [patients, setPatients] = useState([]);
-  const [selectedPatient, setSelectedPatient] = useState('');
+  const [selectedPatient, setSelectedPatient] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
-  const [instructions, setInstructions] = useState('');
+  const [instructions, setInstructions] = useState("");
 
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/patients/');
+        const response = await fetch("http://127.0.0.1:8000/api/patients/");
         const data = await response.json();
         setPatients(data);
       } catch (error) {
-        console.error('Erreur lors du chargement des patients:', error);
+        console.error("Erreur lors du chargement des patients:", error);
       }
     };
 
@@ -30,51 +37,70 @@ function AppointmentForm() {
   };
 
   const handleSubmit = async () => {
-    const formattedDate = selectedDate ? selectedDate.toISOString().split('T')[0] : null; // YYYY-MM-DD
-    const formattedTime = selectedTime ? selectedTime.toISOString().split('T')[1].split('.')[0] : null; // HH:MM:SS
-  
+    const formattedDate = selectedDate
+      ? `${selectedDate.getFullYear()}-${(selectedDate.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}-${selectedDate
+          .getDate()
+          .toString()
+          .padStart(2, "0")}`
+      : null;
+
+    // Conserver l'heure au format HH:MM:SS
+    const formattedTime = selectedTime
+      ? selectedTime.toISOString().split("T")[1].split(".")[0]
+      : null;
+
     const appointmentData = {
-      patientId: selectedPatient,
+      patient: selectedPatient, // Assurez-vous que cela contient uniquement l'ID du patient
       date: formattedDate,
       time: formattedTime,
       instructions: instructions,
     };
-  
-    console.log('Données du rendez-vous à envoyer:', appointmentData);
-  
+
+    console.log("Données du rendez-vous à envoyer:", appointmentData);
+
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/api/rdv/', {
-        method: 'POST',
+      const response = await fetch("http://127.0.0.1:8000/api/rdvs/create/", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(appointmentData),
       });
-  
+
       const responseData = await response.json();
-      console.log('Réponse de l\'API:', responseData);
+      console.log("Réponse de l'API:", responseData);
       if (response.ok) {
-        console.log('Rendez-vous enregistré avec succès');
+        console.log("Rendez-vous enregistré avec succès");
         // Vider les champs
-        setSelectedPatient('');
+        setSelectedPatient("");
         setSelectedDate(null);
         setSelectedTime(null);
-        setInstructions('');
+        setInstructions("");
       } else {
-        console.error('Erreur lors de l\'enregistrement du rendez-vous:', responseData);
+        console.error(
+          "Erreur lors de l'enregistrement du rendez-vous:",
+          responseData
+        );
       }
     } catch (error) {
-      console.error('Erreur réseau lors de l\'enregistrement du rendez-vous:', error);
+      console.error(
+        "Erreur réseau lors de l'enregistrement du rendez-vous:",
+        error
+      );
     }
   };
-  
-  
+
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-<br/>
-<br/>
+      <br />
+      <br />
 
-      <Paper elevation={3} sx={{ maxWidth: 500, margin: 'auto', padding: 4, mt: 5 }}>
+      <Paper
+        elevation={3}
+        sx={{ maxWidth: 5000, margin: "auto", padding: 4, mt: 14 }}
+      >
         <Typography variant="h6" gutterBottom align="center">
           Prendre un rendez-vous
         </Typography>
@@ -89,32 +115,48 @@ function AppointmentForm() {
           variant="outlined"
         >
           {patients.map((patient) => (
-            <MenuItem 
-              key={patient.id} 
-              value={`${patient.prenom} ${patient.nom}`} // Affiche le nom complet dans la zone de sélection
+            <MenuItem
+              key={patient.id}
+              value={patient.id} // L'ID est maintenant la valeur de chaque option
             >
-              {patient.prenom} {patient.nom}
+              {patient.prenom} {patient.nom}{" "}
+              {/* Affiche le nom complet dans la sélection */}
             </MenuItem>
           ))}
         </TextField>
-<br/>
-<br/>
+
+        <br />
+        <br />
         <DatePicker
           label="Sélectionner une date"
           value={selectedDate}
           onChange={(newValue) => setSelectedDate(newValue)}
-          renderInput={(params) => <TextField fullWidth margin="normal" variant="outlined" {...params} />}
+          renderInput={(params) => (
+            <TextField
+              fullWidth
+              margin="normal"
+              variant="outlined"
+              {...params}
+            />
+          )}
         />
-<br/>
-<br/>
+        <br />
+        <br />
 
         <TimePicker
           label="Sélectionner une heure"
           value={selectedTime}
           onChange={(newValue) => setSelectedTime(newValue)}
-          renderInput={(params) => <TextField fullWidth margin="normal" variant="outlined" {...params} />}
+          renderInput={(params) => (
+            <TextField
+              fullWidth
+              margin="normal"
+              variant="outlined"
+              {...params}
+            />
+          )}
         />
-<br/>
+        <br />
 
         <TextField
           fullWidth

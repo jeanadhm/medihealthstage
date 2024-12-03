@@ -2,8 +2,9 @@ from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework import status
 from rest_framework import viewsets
-from .models import Doctor, Patient, RendezVous
-from .serializers import DoctorSerializer, PatientLoginSerializer, RendezVousSerializer, PatientSerializer
+from rest_framework.response import Response
+from .models import Doctor, Patient, RendezVous,Appointment, Rdv
+from .serializers import DoctorSerializer, PatientLoginSerializer, RendezVousSerializer, PatientSerializer,AppointmentSerializer, CreateAppointmentSerializer, RdvSerializer
 from django.contrib.auth.hashers import make_password
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -162,19 +163,92 @@ class RendezVousViewSet(viewsets.ModelViewSet):
     serializer_class = RendezVousSerializer
 
     def create(self, request, *args, **kwargs):
-        patient_name = request.data.get('patientName')  # Récupérer le nom du patient
+        # Récupérer les données
+        patient_name = request.data.get('patientName', '').strip()
         date = request.data.get('date')
         time = request.data.get('time')
-        instructions = request.data.get('instructions')
+        instructions = request.data.get('instructions', 'Aucune instruction')
 
-        # Créer une instance de rendez-vous
+        # Validation des champs obligatoires
+        if not patient_name:
+            return Response({'error': 'Le nom complet du patient est requis.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not date or not time:
+            return Response({'error': 'La date et l\'heure sont obligatoires.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Diviser le nom complet en prénom et nom
+        try:
+            name_parts = patient_name.split(' ', 1)  # Divise en deux parties seulement
+            if len(name_parts) != 2:
+                raise ValueError("Format incorrect")
+            prenom, nom = name_parts
+        except ValueError:
+            return Response({'error': 'Le nom complet doit inclure un prénom et un nom.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Rechercher le patient par prénom et nom
+        try:
+            patient = Patient.objects.get(prenom=prenom, nom=nom)
+        except Patient.DoesNotExist:
+            return Response({'error': 'Aucun patient trouvé avec ce prénom et nom.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Créer le rendez-vous
         rendez_vous = RendezVous.objects.create(
-            patient_name=patient_name,  # Assurez-vous que le champ existe dans votre modèle
+            patient=patient,
             date=date,
             time=time,
             instructions=instructions
         )
-        
-        # Serialize et renvoyer la réponse
+
+        # Sérialiser et retourner la réponse
         serializer = self.get_serializer(rendez_vous)
-        return Response(serializer.data, status=201)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class AppointmentListCreateView(APIView):
+     def post(self, request):
+        # Récupérer l'ID du patient
+        patient_id = request.data.get('patient')
+        try:
+            patient = Patient.objects.get(id=patient_id)
+        except Patient.DoesNotExist:
+            return Response({"error": "Patient non trouvé"}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Créer le rendez-vous avec le patient
+        appointment_data = {
+            'patient': patient,
+            'date': request.data.get('date'),
+            'time': request.data.get('time'),
+            'instructions': request.data.get('instructions'),
+        }
+        
+        # Serializer
+        serializer = CreateAppointmentSerializer(data=appointment_data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class RdvCreateView(APIView):
+    def post(self, request):
+        serializer = RdvSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+@api_view(['GET'])
+def list_appointments(request):
+    appointments = Rdv.objects.all().order_by('date', 'time')
+    serializer = RdvSerializer(appointments, many=True)
+    return Response(serializer.data)
+
+@api_view(['PATCH'])
+def update_appointment_status(request, pk):
+    try:
+        appointment = Rdv.objects.get(pk=pk)
+    except Rdv.DoesNotExist:
+        return Response({'error': 'Rendez-vous introuvable'}, status=status.HTTP_404_NOT_FOUND)
+
+    appointment.status = request.data.get('status', appointment.status)
+    appointment.save()
+    return Response({'message': 'Statut mis à jour avec succès'})

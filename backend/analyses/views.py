@@ -11,23 +11,41 @@ from django.conf import settings
 from .models import CommonAnalysis, CholesterolAnalysis, IstAnalysis, DiabetesAnalysis, Dossier
 from .serializers import CommonAnalysisSerializer, CholesterolAnalysisSerializer, IstAnalysisSerializer, DiabetesAnalysisSerializer
 from users.models import Patient
-
-class CommonAnalysisCreateView(generics.CreateAPIView):
+# Vues pour les analyses courantes
+class CommonAnalysisListCreateView(generics.ListCreateAPIView):
     queryset = CommonAnalysis.objects.all()
     serializer_class = CommonAnalysisSerializer
 
-class CholesterolAnalysisCreateView(generics.CreateAPIView):
+class CommonAnalysisDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CommonAnalysis.objects.all()
+    serializer_class = CommonAnalysisSerializer
+
+# Vues pour les analyses de cholestérol
+class CholesterolAnalysisListCreateView(generics.ListCreateAPIView):
     queryset = CholesterolAnalysis.objects.all()
     serializer_class = CholesterolAnalysisSerializer
 
-class IstAnalysisCreateView(generics.CreateAPIView):
+class CholesterolAnalysisDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CholesterolAnalysis.objects.all()
+    serializer_class = CholesterolAnalysisSerializer
+
+# Vues pour les analyses IST
+class IstAnalysisListCreateView(generics.ListCreateAPIView):
     queryset = IstAnalysis.objects.all()
     serializer_class = IstAnalysisSerializer
 
-class DiabetesAnalysisCreateView(generics.CreateAPIView):
+class IstAnalysisDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = IstAnalysis.objects.all()
+    serializer_class = IstAnalysisSerializer
+
+# Vues pour les analyses de diabète
+class DiabetesAnalysisListCreateView(generics.ListCreateAPIView):
     queryset = DiabetesAnalysis.objects.all()
     serializer_class = DiabetesAnalysisSerializer
 
+class DiabetesAnalysisDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = DiabetesAnalysis.objects.all()
+    serializer_class = DiabetesAnalysisSerializer
 
 
 def save_pdf(patient_name, analysis_data, analysis_type):
@@ -97,4 +115,4 @@ class AllAnalysesListView(APIView):
             "cholesterol_analyses": cholesterol_serializer.data,
             "ist_analyses": ist_serializer.data,
             "diabetes_analyses": diabetes_serializer.data,
-        })
+        }) 

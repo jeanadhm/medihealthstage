@@ -1,13 +1,18 @@
 # users/serializers.py
 from rest_framework import serializers
-from .models import Patient, Doctor, RendezVous
+from .models import Patient, Doctor, RendezVous,Appointment, Rdv
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
 
 class PatientSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Patient
-        fields = '__all__'  # Ou spécifiez les champs explicitement
+        fields = ['id', 'nom', 'prenom', 'full_name', 'email', 'dateNaissance', 'adresse', 'numeroTelephone']
+
+    def get_full_name(self, obj):
+        return f"{obj.nom} {obj.prenom}"
 
     def create(self, validated_data):
         # Hacher le mot de passe avant de créer l'objet Patient
@@ -61,4 +66,28 @@ class RendezVousSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RendezVous
+        fields = '__all__'
+
+
+class AppointmentSerializer(serializers.ModelSerializer):
+    patient = PatientSerializer()
+
+    class Meta:
+        model = Appointment
+        fields = ['id', 'patient', 'date', 'time', 'instructions']
+
+class CreateAppointmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Appointment
         fields = ['patient', 'date', 'time', 'instructions']
+
+
+class RdvSerializer(serializers.ModelSerializer):
+    patient_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Rdv
+        fields = ['id', 'patient_name', 'date', 'time', 'instructions', 'status']
+
+    def get_patient_name(self, obj):
+        return f"{obj.patient.prenom} {obj.patient.nom}"  # Remplacez par les champs réels du modèle Patient

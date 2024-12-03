@@ -5,8 +5,8 @@ from django.db import models
 class Patient(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True)
     email = models.EmailField(unique=True, null=False, blank=False)
-    nom = models.CharField(max_length=100, null=True, blank=True, default='Inconnu')
-    prenom = models.CharField(max_length=100, null=True, blank=True, default='Inconnu')
+    nom = models.CharField(max_length=100, null=False, blank=False)
+    prenom = models.CharField(max_length=100, null=False, blank=False)
     dateNaissance = models.DateField(null=True, blank=True)
     adresse = models.TextField(null=True, blank=True, default='')
     numeroTelephone = models.CharField(max_length=20, null=True, blank=True, default='0000000000')
@@ -15,8 +15,8 @@ class Patient(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    USERNAME_FIELD = 'email'  # L'email reste utilisé pour les fonctions d'authentification
+    REQUIRED_FIELDS = ['nom', 'prenom']  # Ces champs seront requis lors de la création d'un utilisateur
 
     groups = models.ManyToManyField(
         'auth.Group',
@@ -28,9 +28,16 @@ class Patient(AbstractBaseUser, PermissionsMixin):
         related_name='patient_user_permissions',
         blank=True
     )
+    class Meta:
+        unique_together = ('nom', 'prenom')  # Contraintes d'unicité pour `nom` et `prenom`
 
     def __str__(self):
-        return self.email
+        return f"{self.prenom} {self.nom}"
+
+    @property
+    def full_name(self):
+        """Retourne le nom complet du patient."""
+        return f"{self.nom} {self.prenom}"
 
 class Doctor(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True)
@@ -66,16 +73,40 @@ class Doctor(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 class RendezVous(models.Model):
-    patient = models.ForeignKey(
-        Patient,
-        on_delete=models.CASCADE,
-        related_name='rendez_vous',
-        null=False,
-        blank=False
-    )
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="rdv")
     date = models.DateField()
     time = models.TimeField()
-    instructions = models.TextField(null=True, blank=True, default='Aucune instruction')
+    instructions = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.patient.email} - {self.date} {self.time}"
+        return f"Rendez-vous avec {self.patient} le {self.date} à {self.time}"
+
+
+class Appointment(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="appointments")
+    date = models.DateField()
+    time = models.TimeField()
+    instructions = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Rendez-vous avec {self.patient} le {self.date} à {self.time}"
+
+class Rdv(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'En attente'),
+        ('attended', 'Le patient est venu'),
+        ('missed', 'Le patient n\'est pas venu'),
+    ]
+
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="rdvs")
+    date = models.DateField()
+    time = models.TimeField()
+    instructions = models.TextField(blank=True, null=True)
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='pending'
+    )
+
+    def __str__(self):
+        return f"Rendez-vous de {self.patient} le {self.date} à {self.time}"
