@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHeart, faUsers, faHandsHelping } from '@fortawesome/free-solid-svg-icons';
+import { faHeart, faUsers, faHandsHelping, faShieldAlt, faGlobe, faBrain } from '@fortawesome/free-solid-svg-icons';
+
 import AOS from "aos";
 import "aos/dist/aos.css";
 
@@ -116,48 +117,59 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="relative py-20">
-          <div
-            className="bottom-auto top-0 left-0 right-0 w-full absolute pointer-events-none overflow-hidden -mt-20 h-20"
-            style={{ transform: "translateZ(0)" }}
-          >
-            <svg
-              className="absolute bottom-0 overflow-hidden"
-              xmlns="http://www.w3.org/2000/svg"
-              preserveAspectRatio="none"
-              version="1.1"
-              viewBox="0 0 2560 100"
-              x="0"
-              y="0"
-            >
-              <polygon
-                className="text-white fill-current"
-                points="2560 0 2560 100 0 100"
-              ></polygon>
-            </svg>
-          </div>
-
+        {/* Nouvelle section : Accessibilité Globale */}
+        <section className="py-20 bg-blueGray-800 text-white">
           <div className="container mx-auto px-4">
-            <div className="items-center flex flex-wrap">
-              <div className="w-full md:w-4/12 ml-auto mr-auto px-4" data-aos="fade-right">
+            <div className="flex flex-wrap items-center">
+              <div className="w-full md:w-5/12 ml-auto px-4" data-aos="fade-right">
                 <img
-                  alt="..."
+                  src={require('../assets/img/acces.avif')}
+                  alt="Accessibilité Globale"
                   className="max-w-full rounded-lg shadow-lg"
-                  src={require('../assets/img/img1.jpg')}
                 />
               </div>
-              <div className="w-full md:w-5/12 ml-auto mr-auto px-4" data-aos="fade-left">
-                <div className="md:pr-12">
-                  <div className="text-lightBlue-600 p-3 text-center inline-flex items-center justify-center w-16 h-16 mb-6 shadow-lg rounded-full bg-lightBlue-300">
-                    <FontAwesomeIcon icon={faHandsHelping} className="text-xl" />
-                  </div>
-                  <h3 className="text-3xl font-semibold">
-                    Des soins médicaux accessibles à tous.
-                  </h3>
-                  <p className="mt-4 text-lg leading-relaxed text-blueGray-500">
-                    MediHealth a pour mission de rendre les soins médicaux accessibles à tous. Grâce à notre plateforme, nous voulons simplifier l'accès aux services de santé et garantir des soins de qualité pour chacun, quel que soit son statut social ou sa situation géographique.
-                  </p>
+              <div className="w-full md:w-5/12 px-4 text-center md:text-left" data-aos="fade-left">
+                <div className="text-blueGray-500 p-3 text-center inline-flex items-center justify-center w-16 h-16 mb-6 shadow-lg rounded-full bg-lightBlue-300">
+                  <FontAwesomeIcon icon={faGlobe} className="text-lightBlue-800 text-2xl" />
                 </div>
+                <h3 className="text-3xl font-semibold mb-4">
+                  Accessibilité Globale
+                </h3>
+                <p className="text-lg leading-relaxed">
+                  Où que vous soyez, MediHealth vous accompagne. Avec une compatibilité multi-appareils et une disponibilité 24/7, la plateforme assure une couverture mondiale pour les soins et la gestion médicale.
+                </p>
+                <p className="text-lg leading-relaxed">
+                  Accédez aux services de santé essentiels, quel que soit votre emplacement ou votre horaire.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Nouvelle section : Sécurité et confidentialité */}
+        <section className="py-20 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-wrap items-center">
+              <div className="w-full md:w-5/12 ml-auto px-4 text-center" data-aos="fade-right">
+                <div className="text-blueGray-500 p-3 text-center inline-flex items-center justify-center w-16 h-16 mb-6 shadow-lg rounded-full bg-lightBlue-500">
+                  <FontAwesomeIcon icon={faShieldAlt} className="text-white text-2xl" />
+                </div>
+                <h3 className="text-3xl font-semibold mb-4">
+                  Sécurité et Confidentialité
+                </h3>
+                <p className="text-lg leading-relaxed text-blueGray-500">
+                  Chez MediHealth, la sécurité de vos données est notre priorité absolue. Toutes les informations sont cryptées et stockées dans des environnements conformes aux normes médicales les plus strictes.
+                </p>
+                <p className="text-lg leading-relaxed text-blueGray-500">
+                  Faites confiance à une plateforme qui respecte votre vie privée et garantit la confidentialité de chaque interaction.
+                </p>
+              </div>
+              <div className="w-full md:w-5/12 ml-auto px-4" data-aos="fade-left">
+                <img
+                  src={require('../assets/img/img.avif')}
+                  alt="Sécurité et Confidentialité"
+                  className="max-w-full rounded-lg shadow-lg"
+                />
               </div>
             </div>
           </div>

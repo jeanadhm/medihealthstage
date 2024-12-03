@@ -73,7 +73,7 @@ function AllAnalyses() {
   }
 
   return (
-    <Box sx={{ padding: 2 }}>
+    <Box sx={{ padding: 2 , mt: 10}}>
       <Typography variant="h4" gutterBottom>
         Analyses Médicales
       </Typography>
