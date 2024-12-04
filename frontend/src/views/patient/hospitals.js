@@ -40,10 +40,10 @@ const Hospitals = () => {
     <Paper
       elevation={3}
       sx={{
-        maxWidth: 600,
+        maxWidth: 1000,
         margin: "auto",
         padding: 4,
-        mt: 5,
+        mt: 12,
         backgroundColor: "#e3f2fd",
       }}
     >
