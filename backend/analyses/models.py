@@ -59,3 +59,5 @@ class Dossier(models.Model):
 
     def __str__(self):
         return f"{self.patient.nom} {self.patient.prenom} - {self.nom_dossier or 'N/A'}"
+
+

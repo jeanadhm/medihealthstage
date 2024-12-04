@@ -7,6 +7,7 @@ import PatientSidebar from "components/Sidebar/PatientSidebar";
 // views spécifiques au patient
 import PatientRdv from "views/patient/rdvpatients";
 import Chat from "views/patient/consultspatient";
+import Hospitals from "views/patient/hospitals";
 
 // Réutilisation d'autres composants si nécessaire
 import Settings from "views/admin/Settings.js";
@@ -22,6 +23,7 @@ export default function Patient() {
             <Route path="rdv" element={<PatientRdv />} />
             <Route path="myconsultations" element={<Chat />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="hospitals" element={<Hospitals />} />
 
             {/* Redirection par défaut pour les chemins invalides */}
             <Route path="*" element={<Navigate to="rdv" />} />

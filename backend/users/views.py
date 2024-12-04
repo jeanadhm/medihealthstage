@@ -3,8 +3,8 @@ from rest_framework import generics
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
-from .models import Doctor, Patient, RendezVous,Appointment, Rdv
-from .serializers import DoctorSerializer, PatientLoginSerializer, RendezVousSerializer, PatientSerializer,AppointmentSerializer, CreateAppointmentSerializer, RdvSerializer
+from .models import Doctor, Patient, RendezVous,Appointment, Rdv, Consultation
+from .serializers import DoctorSerializer, PatientLoginSerializer, RendezVousSerializer, PatientSerializer,AppointmentSerializer, CreateAppointmentSerializer, RdvSerializer, ConsultationSerializer
 from django.contrib.auth.hashers import make_password
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -12,6 +12,7 @@ from rest_framework.decorators import api_view
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.hashers import check_password
+from django.db.models import Q
 
 from django.http import JsonResponse
 
@@ -252,3 +253,22 @@ def update_appointment_status(request, pk):
     appointment.status = request.data.get('status', appointment.status)
     appointment.save()
     return Response({'message': 'Statut mis à jour avec succès'})
+
+
+class ConsultationListCreateView(generics.ListCreateAPIView):
+    queryset = Consultation.objects.all()
+    serializer_class = ConsultationSerializer
+
+
+class HospitalSearchFromDoctorsView(APIView):
+    def get(self, request):
+        query = request.GET.get('q', '')
+        # Rechercher dans les champs hopital, adresseHopital
+        doctors = Doctor.objects.filter(
+            Q(hopital__icontains=query) | Q(adresseHopital__icontains=query)
+        )
+        # Préparer les données pour la réponse
+        results = doctors.values(
+            'hopital', 'adresseHopital', 'telHopital'
+        ).distinct()
+        return Response(results)

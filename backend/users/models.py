@@ -110,3 +110,15 @@ class Rdv(models.Model):
 
     def __str__(self):
         return f"Rendez-vous de {self.patient} le {self.date} à {self.time}"
+
+
+class Consultation(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="consultations")
+    date = models.DateField()
+    symptoms = models.TextField(blank=True, null=True)
+    temperature = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    blood_pressure = models.CharField(max_length=20, blank=True, null=True)
+    pulse = models.PositiveIntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Consultation de {self.patient.full_name} le {self.date}"

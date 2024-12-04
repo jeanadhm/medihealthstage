@@ -122,13 +122,13 @@ export default function DoctorSidebar() {
                 {openSubMenu === "messages" && (
                   <motion.ul className="ml-4" initial={{ maxHeight: 0 }} animate={{ maxHeight: 100 }} transition={{ duration: 0.3 }}>
                     <li>
-                      <Link className="sub-menu-item text-xs uppercase py-2 block" to="/doctor/consultations/all">
-                        <i className="fas fa-eye mr-2 text-sm"></i> Voir les messages
+                      <Link className="sub-menu-item text-xs uppercase py-2 block" to="/doctor/consults">
+                        <i className="fas fa-eye mr-2 text-sm"></i> consultation physique
                       </Link>
                     </li>
                     <li>
                       <Link className="sub-menu-item text-xs uppercase py-2 block" to="/doctor/consultations">
-                        <i className="fas fa-paper-plane mr-2 text-sm"></i> Envoyer message
+                        <i className="fas fa-paper-plane mr-2 text-sm"></i> Consultation en ligne
                       </Link>
                     </li>
                   </motion.ul>

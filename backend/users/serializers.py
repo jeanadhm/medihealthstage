@@ -1,6 +1,6 @@
 # users/serializers.py
 from rest_framework import serializers
-from .models import Patient, Doctor, RendezVous,Appointment, Rdv
+from .models import Patient, Doctor, RendezVous,Appointment, Rdv, Consultation
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
 
@@ -91,3 +91,11 @@ class RdvSerializer(serializers.ModelSerializer):
 
     def get_patient_name(self, obj):
         return f"{obj.patient.prenom} {obj.patient.nom}"  # Remplacez par les champs réels du modèle Patient
+
+class ConsultationSerializer(serializers.ModelSerializer):
+    patient_full_name = serializers.ReadOnlyField(source="patient.full_name")
+
+    class Meta:
+        model = Consultation
+        fields = ['id', 'patient', 'patient_full_name', 'date', 'symptoms', 'temperature', 'blood_pressure', 'pulse']
+

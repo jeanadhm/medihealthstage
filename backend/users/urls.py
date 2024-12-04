@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import RegisterDoctorView, RegisterPatientView, list_doctors, list_patients, PatientLoginView, DoctorLoginView, RendezVousViewSet,AppointmentListCreateView, RdvCreateView, list_appointments,update_appointment_status
+from .views import RegisterDoctorView, RegisterPatientView, list_doctors, list_patients, PatientLoginView, DoctorLoginView, RendezVousViewSet,AppointmentListCreateView, RdvCreateView, list_appointments,update_appointment_status, ConsultationListCreateView, HospitalSearchFromDoctorsView
 
 # Créer un routeur
 router = DefaultRouter()
@@ -18,4 +18,6 @@ urlpatterns = [
     path('rdvs/create/', RdvCreateView.as_view(), name='rdv-create'),
     path('rdvs/',list_appointments, name='list_appointments'),
     path('rdvs/<int:pk>/status/',update_appointment_status, name='update_appointment_status'),
+    path('consultations/', ConsultationListCreateView.as_view(), name='consultation-list-create'),
+    path('hospitals/doctors/', HospitalSearchFromDoctorsView.as_view(), name='hospital-search-doctors'),
 ]
