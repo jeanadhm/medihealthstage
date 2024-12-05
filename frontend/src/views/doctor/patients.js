@@ -11,7 +11,7 @@ const PatientsList = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newPatient, setNewPatient] = useState({
     nom: '',
-    prenom: '',
+    prenoms: '',
     dateNaissance: '',
     adresse: '',
     email: '',
@@ -56,7 +56,7 @@ const PatientsList = () => {
       setShowCreateForm(false);
       setNewPatient({
         nom: '',
-        prenom: '',
+        prenoms: '',
         dateNaissance: '',
         adresse: '',
         email: '',
@@ -112,9 +112,9 @@ const PatientsList = () => {
                         />
                         <input
                           type="text"
-                          name="prenom"
+                          name="prenoms"
                           placeholder="Prénom"
-                          value={newPatient.prenom}
+                          value={newPatient.prenoms}
                           onChange={handleInputChange}
                           className="mb-2 px-4 py-2 border rounded w-full"
                         />
@@ -176,7 +176,7 @@ const PatientsList = () => {
                           {filteredPatients.map((patient) => (
                             <tr key={patient.id}>
                               <td className="border px-4 py-2">{patient.nom}</td>
-                              <td className="border px-4 py-2">{patient.prenom}</td>
+                              <td className="border px-4 py-2">{patient.prenoms}</td>
                               <td className="border px-4 py-2">{patient.dateNaissance}</td>
                               <td className="border px-4 py-2">{patient.adresse}</td>
                               <td className="border px-4 py-2">{patient.email}</td>

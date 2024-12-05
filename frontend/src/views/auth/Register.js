@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate  } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Navbar from "components/Navbars/AuthNavbar.js";
 import Footer from "components/Footers/Footer.js";
-import Carousel from 'views/carrousel';
 
 const Register = () => {
   const [role, setRole] = useState('');
-  const history = useNavigate ();
+  const navigate = useNavigate();
 
   const handleRoleSelect = (selectedRole) => {
     setRole(selectedRole);
@@ -17,41 +16,60 @@ const Register = () => {
     <>
       <Navbar transparent />
       <main>
-        <section className="pb-20 relative block bg-blueGray-800">
-          <div className="bottom-auto top-0 left-0 right-0 w-full absolute pointer-events-none overflow-hidden -mt-20 h-20" style={{ transform: "translateZ(0)" }}>
-            <svg className="absolute bottom-0 overflow-hidden" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" version="1.1" viewBox="0 0 2560 100" x="0" y="0">
-              <polygon className="text-blueGray-800 fill-current" points="2560 0 2560 100 0 100"></polygon>
+        <section style={{ backgroundColor: '#2d3748', paddingBottom: '5rem' }}>
+          <div
+            style={{
+              bottom: 'auto',
+              top: 0,
+              left: 0,
+              right: 0,
+              width: '100%',
+              height: '5rem',
+              position: 'absolute',
+              transform: 'translateZ(0)',
+              pointerEvents: 'none',
+            }}
+          >
+            <svg
+              style={{ position: 'absolute', bottom: 0, overflow: 'hidden' }}
+              xmlns="http://www.w3.org/2000/svg"
+              preserveAspectRatio="none"
+              version="1.1"
+              viewBox="0 0 2560 100"
+              x="0"
+              y="0"
+            >
+              <polygon fill="#2d3748" points="2560 0 2560 100 0 100"></polygon>
             </svg>
           </div>
         </section>
-        <section className="relative block py-24 lg:pt-0 bg-blueGray-800">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-wrap justify-center lg:-mt-64 -mt-48">
-              <div className="w-full lg:w-6/12 px-4"style={{marginTop:'300px'}}>
-                <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-blueGray-200">
-                  <div className="flex-auto p-5 lg:p-10">
-                    <h4 className="text-2xl font-semibold mb-4">Qui êtes-vous ?</h4>
-                    <div className="flex justify-center flex-wrap">
-                      <RoleOption
-                        role="patient"
-                        label="Patient"
-                        onSelect={handleRoleSelect}
-                      />
-                      <RoleOption
-                        role="medecin"
-                        label="Médecin"
-                        onSelect={handleRoleSelect}
-                      />
-                    </div>
-                  </div>
+        <section style={{ backgroundColor: '#2d3748', padding: '6rem 0' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '-12rem' }}>
+              <div
+                style={{
+                  backgroundColor: '#edf2f7',
+                  borderRadius: '8px',
+                  padding: '2rem',
+                  boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+                  width: '100%',
+                  maxWidth: '600px',
+                }}
+              >
+                <h4 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem', textAlign: 'center' }}>
+                  Qui êtes-vous ?
+                </h4>
+                <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <RoleOption role="patient" label="Patient" onSelect={handleRoleSelect} />
+                  <RoleOption role="medecin" label="Médecin" onSelect={handleRoleSelect} />
                 </div>
               </div>
             </div>
           </div>
         </section>
         <div style={{ marginBottom: '3rem' }}>
-          {role === 'patient' && <PatientForm />}
-          {role === 'medecin' && <MedecinForm />}
+          {role === 'patient' && <PatientForm navigate={navigate} />}
+          {role === 'medecin' && <MedecinForm navigate={navigate} />}
         </div>
       </main>
       <Footer />
@@ -59,383 +77,240 @@ const Register = () => {
   );
 };
 
-const RoleOption = ({ role, label, onSelect }) => {
-  return (
-    <button
-      className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-      onClick={() => onSelect(role)}
-      style={{ minWidth: '150px', margin: '0.5rem' }}
-    >
-      {label}
-    </button>
-  );
-};
+const RoleOption = ({ role, label, onSelect }) => (
+  <button
+    style={{
+      backgroundColor: '#2d3748',
+      mt: 20,
+      color: '#fff',
+      padding: '0.75rem 1.5rem',
+      borderRadius: '4px',
+      fontWeight: 'bold',
+      textTransform: 'uppercase',
+      margin: '0.5rem',
+      cursor: 'pointer',
+      transition: 'all 0.2s',
+      minWidth: '150px',
+    }}
+    onClick={() => onSelect(role)}
+  >
+    {label}
+  </button>
+);
 
-const PatientForm = () => {
+const Notification = ({ message, type }) => (
+  <div
+    style={{
+      marginBottom: '1rem',
+      padding: '1rem',
+      borderRadius: '4px',
+      color: type === 'success' ? '#155724' : '#721c24',
+      backgroundColor: type === 'success' ? '#d4edda' : '#f8d7da',
+      border: type === 'success' ? '1px solid #c3e6cb' : '1px solid #f5c6cb',
+      textAlign: 'center',
+    }}
+  >
+    {message}
+  </div>
+);
+
+const PatientForm = ({ navigate }) => {
   const [formData, setFormData] = useState({
     nom: '',
-    prenom: '',
+    prenoms: '',
     dateNaissance: '',
     adresse: '',
     email: '',
     numeroTelephone: '',
     password: '',
+    role: 'patient',
   });
-  const history = useNavigate ();
+  const [notification, setNotification] = useState(null);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (Object.values(formData).some((field) => !field)) {
+      setNotification({ message: "Tous les champs sont obligatoires.", type: "error" });
+      return;
+    }
+
     try {
-      await axios.post('http://127.0.0.1:8000/api/register/patient/', formData);
-      alert('Patient enregistré avec succès');
-      history.push('/some-route'); // Changez '/some-route' à la route désirée après l'enregistrement
+      await axios.post('http://127.0.0.1:8000/api/users/patients/', formData);
+      setNotification({ message: "Patient enregistré avec succès.", type: "success" });
+      setTimeout(() => navigate('/connexionpat'), 2000);
     } catch (error) {
-      console.error('Erreur lors de l\'enregistrement du patient', error);
+      setNotification({ message: `Erreur: ${JSON.stringify(error.response?.data)}`, type: "error" });
     }
   };
 
   const handleCancel = () => {
     setFormData({
       nom: '',
-      prenom: '',
+      prenoms: '',
       dateNaissance: '',
       adresse: '',
       email: '',
       numeroTelephone: '',
-      password :'',
+      password: '',
+      role: 'patient',
     });
+    setNotification(null);
   };
 
   return (
-    <section className="relative block py-24 lg:pt-0 bg-blueGray-800">
-      <br /><br /><br /><br /><br /><br /><br />
-      <div className="container mx-auto px-4">
-        <div className="flex flex-wrap justify-center lg:-mt-64 -mt-48">
-          <div className="w-full lg:w-6/12 px-4">
-            <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-blueGray-200">
-              <div className="flex-auto p-5 lg:p-10">
-                <h4 className="text-2xl font-semibold">Formulaire Patient</h4>
-                <form onSubmit={handleSubmit}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                    <div style={{ width: '48%' }}>
-                      <label htmlFor="nom">Nom:</label>
-                      <input
-                        type="text"
-                        id="nom"
-                        name="nom"
-                        value={formData.nom}
-                        onChange={handleChange}
-                        style={{ width: '100%', padding: '0.5rem' }}
-                      />
-                    </div>
-                    <div style={{ width: '48%' }}>
-                      <label htmlFor="prenom">Prénom:</label>
-                      <input
-                        type="text"
-                        id="prenom"
-                        name="prenom"
-                        value={formData.prenom}
-                        onChange={handleChange}
-                        style={{ width: '100%', padding: '0.5rem' }}
-                      />
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                    <div style={{ width: '48%' }}>
-                      <label htmlFor="dateNaissance">Date de Naissance:</label>
-                      <input
-                        type="date"
-                        id="dateNaissance"
-                        name="dateNaissance"
-                        value={formData.dateNaissance}
-                        onChange={handleChange}
-                        style={{ width: '100%', padding: '0.5rem' }}
-                      />
-                    </div>
-                    <div style={{ width: '48%' }}>
-                      <label htmlFor="adresse">Adresse:</label>
-                      <input
-                        type="text"
-                        id="adresse"
-                        name="adresse"
-                        value={formData.adresse}
-                        onChange={handleChange}
-                        style={{ width: '100%', padding: '0.5rem' }}
-                      />
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                    <div style={{ width: '48%' }}>
-                      <label htmlFor="email">Email:</label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        style={{ width: '100%', padding: '0.5rem' }}
-                      />
-                    </div>
-                    <div style={{ width: '48%' }}>
-                      <label htmlFor="numeroTelephone">Numéro de Téléphone:</label>
-                      <input
-                        type="tel"
-                        id="numeroTelephone"
-                        name="numeroTelephone"
-                        value={formData.numeroTelephone}
-                        onChange={handleChange}
-                        style={{ width: '100%', padding: '0.5rem' }}
-                      />
-                    </div>
-                    <div style={{ width: '48%' }}>
-                      <label htmlFor="nom">Mot de passe:</label>
-                      <input
-                        type="text"
-                        id="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        style={{ width: '100%', padding: '0.5rem' }}
-                      />
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <button
-                      type="submit"
-                      className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
-                      style={{ margin: '0.5rem' }}
-                    >
-                      Envoyer
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCancel}
-                      className="bg-red-500 text-white active:bg-red-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
-                      style={{ margin: '0.5rem' }}
-                    >
-                      Annuler
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
+    <FormContainer title="Inscription Patient" onSubmit={handleSubmit}>
+      {notification && <Notification message={notification.message} type={notification.type} />}
+      <Field name="nom" label="Nom" value={formData.nom} onChange={handleChange} />
+      <Field name="prenoms" label="Prénom" value={formData.prenoms} onChange={handleChange} />
+      <Field type="date" name="dateNaissance" label="Date de Naissance" value={formData.dateNaissance} onChange={handleChange} />
+      <Field name="adresse" label="Adresse" value={formData.adresse} onChange={handleChange} />
+      <Field type="email" name="email" label="Email" value={formData.email} onChange={handleChange} />
+      <Field type="tel" name="numeroTelephone" label="Numéro de Téléphone" value={formData.numeroTelephone} onChange={handleChange} />
+      <Field type="password" name="password" label="Mot de Passe" value={formData.password} onChange={handleChange} />
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <button type="submit" style={buttonStyle}>Envoyer</button>
+        <button type="button" style={{ ...buttonStyle, backgroundColor: '#e53e3e' }} onClick={handleCancel}>Annuler</button>
       </div>
-    </section>
+    </FormContainer>
   );
 };
 
-const MedecinForm = () => {
+const MedecinForm = ({ navigate }) => {
   const [formData, setFormData] = useState({
     nom: '',
-    prenom: '',
+    prenoms: '',
+    email: '',
     anneeNaissance: '',
     numIdentification: '',
     hopital: '',
     telHopital: '',
     adresseHopital: '',
-    documentsVerification: '',
-    password:'',
+    documentsVerification: null,
+    password: '',
+    role: 'doctor',
   });
-  const history = useNavigate ();
+  const [notification, setNotification] = useState(null);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, files } = e.target;
     if (name === "documentsVerification") {
-      setFormData({
-        ...formData,
-        [name]: e.target.files[0]
-      });
+      setFormData((prev) => ({ ...prev, [name]: files[0] }));
     } else {
-      setFormData({
-        ...formData,
-        [name]: value
-      });
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (Object.keys(formData).some((key) => !formData[key] && key !== "documentsVerification")) {
+
+      setNotification({ message: "Tous les champs sont obligatoires.", type: "error" });
+      return;
+    }
+
     const formDataToSubmit = new FormData();
-    Object.keys(formData).forEach(key => {
+    Object.keys(formData).forEach((key) => {
       formDataToSubmit.append(key, formData[key]);
     });
+
     try {
-      await axios.post('http://127.0.0.1:8000/api/register/doctor/', formDataToSubmit, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+      await axios.post('http://127.0.0.1:8000/api/users/doctors/', formDataToSubmit, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-      alert('Médecin enregistré avec succès');
-      history.push('/some-route'); // Changez '/some-route' à la route désirée après l'enregistrement
+      setNotification({ message: "Médecin enregistré avec succès.", type: "success" });
+      setTimeout(() => navigate('/connexiondoc'), 2000);
     } catch (error) {
-      console.error('Erreur lors de l\'enregistrement du médecin', error);
+      setNotification({ message: `Erreur: ${JSON.stringify(error.response?.data)}`, type: "error" });
     }
   };
 
   const handleCancel = () => {
     setFormData({
       nom: '',
-      prenom: '',
+      prenoms: '',
+      email: '',
       anneeNaissance: '',
       numIdentification: '',
       hopital: '',
       telHopital: '',
       adresseHopital: '',
-      documentsVerification: '',
-      password:'',
+      documentsVerification: null,
+      password: '',
+      role: 'doctor',
     });
+    setNotification(null);
   };
 
   return (
-    <section className="relative block py-24 lg:pt-0 bg-blueGray-800">
-      <br /><br /><br /><br /><br /><br /><br />
-      <div className="container mx-auto px-4">
-        <div className="flex flex-wrap justify-center lg:-mt-64 -mt-48">
-          <div className="w-full lg:w-6/12 px-4">
-            <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-blueGray-200">
-              <div className="flex-auto p-5 lg:p-10">
-                <h4 className="text-2xl font-semibold">Formulaire Médecin</h4>
-                <form onSubmit={handleSubmit}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                    <div style={{ width: '48%' }}>
-                      <label htmlFor="nom">Nom:</label>
-                      <input
-                        type="text"
-                        id="nom"
-                        name="nom"
-                        value={formData.nom}
-                        onChange={handleChange}
-                        style={{ width: '100%', padding: '0.5rem' }}
-                      />
-                    </div>
-                    <div style={{ width: '48%' }}>
-                      <label htmlFor="prenom">Prénom:</label>
-                      <input
-                        type="text"
-                        id="prenom"
-                        name="prenom"
-                        value={formData.prenom}
-                        onChange={handleChange}
-                        style={{ width: '100%', padding: '0.5rem' }}
-                      />
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                    <div style={{ width: '48%' }}>
-                      <label htmlFor="anneeNaissance">Année de Naissance:</label>
-                      <input
-                        type="date"
-                        id="anneeNaissance"
-                        name="anneeNaissance"
-                        value={formData.anneeNaissance}
-                        onChange={handleChange}
-                        style={{ width: '100%', padding: '0.5rem' }}
-                      />
-                    </div>
-                    <div style={{ width: '48%' }}>
-                      <label htmlFor="numIdentification">Numéro d'identification de Médecin:</label>
-                      <input
-                        type="text"
-                        id="numIdentification"
-                        name="numIdentification"
-                        value={formData.numIdentification}
-                        onChange={handleChange}
-                        style={{ width: '100%', padding: '0.5rem' }}
-                      />
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                    <div style={{ width: '48%' }}>
-                      <label htmlFor="hopital">Nom de l'Hôpital:</label>
-                      <input
-                        type="text"
-                        id="hopital"
-                        name="hopital"
-                        value={formData.hopital}
-                        onChange={handleChange}
-                        style={{ width: '100%', padding: '0.5rem' }}
-                      />
-                    </div>
-                    <div style={{ width: '48%' }}>
-                      <label htmlFor="telHopital">Numéro de Téléphone de l'Hôpital:</label>
-                      <input
-                        type="text"
-                        id="telHopital"
-                        name="telHopital"
-                        value={formData.telHopital}
-                        onChange={handleChange}
-                        style={{ width: '100%', padding: '0.5rem' }}
-                      />
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                    <div style={{ width: '48%' }}>
-                      <label htmlFor="adresseHopital">Adresse de l'Hôpital:</label>
-                      <input
-                        type="text"
-                        id="adresseHopital"
-                        name="adresseHopital"
-                        value={formData.adresseHopital}
-                        onChange={handleChange}
-                        style={{ width: '100%', padding: '0.5rem' }}
-                      />
-                    </div>
-                    <div style={{ width: '48%' }}>
-                      <label htmlFor="documentsVerification">Documents de Vérification:</label>
-                      <input
-                        type="file"
-                        id="documentsVerification"
-                        name="documentsVerification"
-                        onChange={handleChange}
-                        style={{ width: '100%', padding: '0.5rem' }}
-                      />
-                    </div>
-                    <div style={{ width: '48%' }}>
-                      <label htmlFor="nom">Mot de passe:</label>
-                      <input
-                        type="text"
-                        id="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        style={{ width: '100%', padding: '0.5rem' }}
-                      />
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <button
-                      type="submit"
-                      className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
-                      style={{ margin: '0.5rem' }}
-                    >
-                      Envoyer
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCancel}
-                      className="bg-red-500 text-white active:bg-red-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
-                      style={{ margin: '0.5rem' }}
-                    >
-                      Annuler
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
+    <FormContainer title="Inscription Médecin" onSubmit={handleSubmit}>
+      {notification && <Notification message={notification.message} type={notification.type} />}
+      <Field name="nom" label="Nom" value={formData.nom} onChange={handleChange} />
+      <Field name="prenoms" label="Prénom" value={formData.prenoms} onChange={handleChange} />
+      <Field type="email" name="email" label="Email" value={formData.email} onChange={handleChange} />
+      <Field name="anneeNaissance" label="Année de Naissance" value={formData.anneeNaissance} onChange={handleChange} />
+      <Field name="numIdentification" label="Numéro d'Identification" value={formData.numIdentification} onChange={handleChange} />
+      <Field name="hopital" label="Hôpital" value={formData.hopital} onChange={handleChange} />
+      <Field name="telHopital" label="Téléphone de l'Hôpital" value={formData.telHopital} onChange={handleChange} />
+      <Field name="adresseHopital" label="Adresse de l'Hôpital" value={formData.adresseHopital} onChange={handleChange} />
+      <Field type="file" name="documentsVerification" label="Documents de Vérification" onChange={handleChange} />
+      <Field type="password" name="password" label="Mot de Passe" value={formData.password} onChange={handleChange} />
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <button type="submit" style={buttonStyle}>Envoyer</button>
+        <button type="button" style={{ ...buttonStyle, backgroundColor: '#e53e3e' }} onClick={handleCancel}>Annuler</button>
       </div>
-    </section>
+    </FormContainer>
   );
+};
+
+const Field = ({ type = "text", name, label, value, onChange }) => (
+  <div style={{ marginBottom: '1rem' }}>
+    <label style={{ display: 'block', marginBottom: '0.5rem' }}>{label}</label>
+    <input
+      type={type}
+      name={name}
+      value={value}
+      onChange={onChange}
+      style={{
+        width: '100%',
+        padding: '0.75rem',
+        borderRadius: '4px',
+        border: '1px solid #e2e8f0',
+        backgroundColor: '#edf2f7',
+      }}
+    />
+  </div>
+);
+
+const FormContainer = ({ title, children, onSubmit }) => (
+  <form
+    onSubmit={onSubmit}
+    style={{
+      backgroundColor: '#fff',
+      borderRadius: '8px',
+      padding: '2rem',
+      boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+      maxWidth: '600px',
+      margin: '0 auto',
+    }}
+  >
+    <h2 style={{ textAlign: 'center', marginBottom: '1rem' }}>{title}</h2>
+    {children}
+  </form>
+);
+
+const buttonStyle = {
+  padding: '0.75rem 1.5rem',
+  borderRadius: '4px',
+  color: '#fff',
+  backgroundColor: '#2d3748',
+  border: 'none',
+  cursor: 'pointer',
+  fontWeight: 'bold',
 };
 
 export default Register;

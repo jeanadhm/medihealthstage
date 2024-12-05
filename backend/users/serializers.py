@@ -1,65 +1,69 @@
 # users/serializers.py
 from rest_framework import serializers
-from .models import Patient, Doctor, RendezVous,Appointment, Rdv, Consultation
+from .models import Patient, Doctor, RendezVous,Appointment, Rdv, Consultation, CustomUser
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
 
-class PatientSerializer(serializers.ModelSerializer):
-    full_name = serializers.SerializerMethodField()
+class CustomUserSerializer(serializers.ModelSerializer):
 
+    password = serializers.CharField()
+    class Meta:
+        
+        model = CustomUser
+        fields = "__all__"
+    read_only_fields = ['id','is_staff', 'is_active']
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = self.Meta.model(**validated_data)
+        if password is not None : 
+            user.set_password(password)
+        user.save()
+        return user
+    
+
+class PatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
-        fields = ['id', 'nom', 'prenom', 'full_name', 'email', 'dateNaissance', 'adresse', 'numeroTelephone']
-
-    def get_full_name(self, obj):
-        return f"{obj.nom} {obj.prenom}"
+        fields = '__all__'  
 
     def create(self, validated_data):
-        # Hacher le mot de passe avant de créer l'objet Patient
-        validated_data['password'] = make_password(validated_data.get('password'))
-        return super().create(validated_data)
+        password = validated_data.pop('password')
+        user = self.Meta.model(**validated_data)
+        if password is not None : 
+            user.set_password(password)
+        user.save()
+        return user
 
-
+    
 
 class DoctorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Doctor
-        fields = '__all__'  # Ou spécifiez explicitement les champs à inclure
+        fields = '__all__'
 
     def create(self, validated_data):
-        # Hacher le mot de passe avant la création
-        validated_data['password'] = make_password(validated_data.get('password'))
-        return super().create(validated_data)
+        groups_data = validated_data.pop('groups', None)
+        permissions_data = validated_data.pop('user_permissions', None)
+        password = validated_data.pop('password')
+        
+        # Création de l'utilisateur sans groupes ni permissions
+        user = self.Meta.model(**validated_data)
+        
+        # Définir le mot de passe si fourni
+        if password:
+            user.set_password(password)
+        user.save()
+        
+        # Ajouter les groupes si fournis
+        if groups_data:
+            user.groups.set(groups_data)
+        
+        # Ajouter les permissions utilisateur si fournies
+        if permissions_data:
+            user.user_permissions.set(permissions_data)
+        
+        return user
 
-class PatientLoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    password = serializers.CharField(write_only=True)
-
-    def validate(self, data):
-        email = data.get('email')
-        password = data.get('password')
-
-        if not email or not password:
-            raise serializers.ValidationError("Email et mot de passe sont obligatoires.")
-
-        try:
-            # Récupérer le patient via l'email
-            patient = Patient.objects.get(email=email)
-        except Patient.DoesNotExist:
-            raise serializers.ValidationError("Aucun utilisateur avec cet email.")
-
-        # Vérifier le mot de passe
-        if not check_password(password, patient.password):
-            raise serializers.ValidationError("Mot de passe incorrect.")
-
-        # Ajouter le patient à validated_data
-        data['patient'] = patient
-        return data
-
-
-class DoctorLoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    password = serializers.CharField()
 
 class RendezVousSerializer(serializers.ModelSerializer):
     patient = serializers.PrimaryKeyRelatedField(queryset=Patient.objects.all())  # Utilise l'ID du patient

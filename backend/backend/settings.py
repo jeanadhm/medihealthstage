@@ -42,8 +42,6 @@ CORS_ALLOWED_HEADERS = [
     'Authorization',
 ]
 
-
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -56,7 +54,21 @@ INSTALLED_APPS = [
     'djoser',
     'users',
     'analyses',
+    'reportlab',
+
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_FILTER_BACKENDS" : [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter'
+    ],
+
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -96,6 +108,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Définir l'URL publique pour accéder aux fichiers médias
 MEDIA_URL = '/media/'
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -106,6 +119,7 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
 
 
 
@@ -126,6 +140,12 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=120),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
 
 
 # Internationalization
@@ -149,3 +169,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'users.CustomUser'

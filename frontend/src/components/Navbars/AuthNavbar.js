@@ -44,40 +44,13 @@ export default function Navbar(props) {
                 </Link>
               </li>
 
-              {/* Connexion avec sous-menu déroulant */}
-              <li className="flex items-center relative">
-                {/* Bouton Connexion */}
-                <button
-                  className="text-blueGray-800 px-3 py-4 lg:py-2 flex items-center text-sm uppercase font-bold hover:text-blueGray-600 focus:outline-none"
-                  onClick={() => setSubmenuOpen(!submenuOpen)}
+              <li className="flex items-center">
+                <Link
+                  className="text-blueGray-800 px-3 py-4 lg:py-2 flex items-center text-sm uppercase font-bold hover:text-blueGray-600"
+                  to="/connexion"
                 >
                   Connexion
-                  <i className="ml-1 fas fa-chevron-down"></i>
-                </button>
-
-                {/* Sous-menu : Patient et Docteur */}
-                {submenuOpen && (
-                  <div className="absolute top-full left-0 bg-white text-blueGray-800 shadow-md rounded w-48 mt-24 z-16">
-                    <ul className="flex flex-col">
-                      <li>
-                        <Link
-                          className="px-4 py-2 block text-sm font-bold uppercase hover:bg-blueGray-100"
-                          to="/Connexionpat"
-                        >
-                          Patient
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          className="px-4 py-2 block text-sm font-bold uppercase hover:bg-blueGray-100"
-                          to="/Connexiondoc"
-                        >
-                          Docteur
-                        </Link>
-                      </li>
-                    </ul>
-                  </div>
-                )}
+                </Link>
               </li>
 
               {/* Lien Contactez-nous */}

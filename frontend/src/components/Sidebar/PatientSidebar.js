@@ -1,6 +1,5 @@
-/*eslint-disable*/
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import "./style.css";
 
@@ -8,10 +7,20 @@ export default function PatientSidebar() {
   const [collapseShow, setCollapseShow] = useState("hidden");
   const [openSubMenu, setOpenSubMenu] = useState("");
   const [theme, setTheme] = useState("light");
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.documentElement.className = theme;
   }, [theme]);
+
+  useEffect(() => {
+    // Récupérer les données de l'utilisateur connecté depuis le localStorage
+    const userData = localStorage.getItem("userData");
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
 
   const toggleSubMenu = (menu) => {
     setOpenSubMenu(openSubMenu === menu ? "" : menu);
@@ -19,6 +28,14 @@ export default function PatientSidebar() {
 
   const changeTheme = (newTheme) => {
     setTheme(newTheme);
+  };
+
+  const handleLogout = () => {
+    // Supprimer les jetons et les données de l'utilisateur du localStorage
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userData");
+    navigate("/login");
   };
 
   return (
@@ -60,11 +77,19 @@ export default function PatientSidebar() {
               collapseShow
             }
           >
+            {/* User Profile */}
+            {user && (
+              <div className="mb-4 px-3 py-2 bg-gray-200 rounded-lg">
+                <h6 className="text-gray-700 font-bold">{user.name}</h6>
+                <p className="text-xs text-gray-500">{user.email}</p>
+              </div>
+            )}
+
             {/* Settings and Profile */}
             <ul className="md:flex-col md:min-w-full flex flex-col list-none mb-4">
               <li className="items-center">
                 <Link
-                  to="/patient/settings/profile"
+                  to="/patient/profile"
                   className="text-xs uppercase py-3 font-bold block"
                 >
                   <i className="fas fa-user-cog mr-2 text-sm"></i> Profile
@@ -180,6 +205,14 @@ export default function PatientSidebar() {
                 )}
               </li>
             </ul>
+
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="text-xs uppercase py-3 font-bold block mt-4 text-red-600"
+            >
+              <i className="fas fa-sign-out-alt mr-2 text-sm"></i> Déconnexion
+            </button>
           </div>
         </div>
       </nav>

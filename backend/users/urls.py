@@ -1,18 +1,21 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import RegisterDoctorView, RegisterPatientView, list_doctors, list_patients, PatientLoginView, DoctorLoginView, RendezVousViewSet,AppointmentListCreateView, RdvCreateView, list_appointments,update_appointment_status, ConsultationListCreateView, HospitalSearchFromDoctorsView
+from .views import DoctorView, PatientView,ConexionUserView, RegisterUserView, list_doctors, list_patients, RendezVousViewSet,AppointmentListCreateView, RdvCreateView, list_appointments,update_appointment_status, ConsultationListCreateView, HospitalSearchFromDoctorsView, UserProfileAPIView
+from rest_framework_simplejwt.views import (
+    TokenRefreshView,
+    TokenVerifyView,
+)
 
 # Créer un routeur
 router = DefaultRouter()
 router.register(r'rdv', RendezVousViewSet, basename='rdv')
+router.register(r'doctors', DoctorView, basename='doctors')
+router.register(r'patients', PatientView, basename='patients')
 
 urlpatterns = [
-    path('register/doctor/', RegisterDoctorView.as_view(), name='register-doctor'),
-    path('register/patient/', RegisterPatientView.as_view(), name='register-patient'),
+   
     path('doctors/', list_doctors, name='list-doctors'),
     path('patients/', list_patients, name='list-patients'),
-    path('patient/login/', PatientLoginView.as_view(), name='patient_login'),
-    path('doctor/login/', DoctorLoginView.as_view(), name='doctor_login'),
     path('api/', include(router.urls)),  # Inclure les routes du routeur ici
     path('rdvs/all/', AppointmentListCreateView.as_view(), name='appointments'),
     path('rdvs/create/', RdvCreateView.as_view(), name='rdv-create'),
@@ -20,4 +23,10 @@ urlpatterns = [
     path('rdvs/<int:pk>/status/',update_appointment_status, name='update_appointment_status'),
     path('consultations/', ConsultationListCreateView.as_view(), name='consultation-list-create'),
     path('hospitals/doctors/', HospitalSearchFromDoctorsView.as_view(), name='hospital-search-doctors'),
+    path('users/', include(router.urls)),  # Inclure les routes du routeur ici
+    path('register/', RegisterUserView.as_view()),
+    path('login/', ConexionUserView.as_view()),
+    path('profile/', UserProfileAPIView.as_view(), name='user-profile'),
+    path('token/refresh/', TokenRefreshView.as_view()),
+    path('token/verify/', TokenVerifyView.as_view()),
 ]

@@ -3,8 +3,8 @@ from rest_framework import generics
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
-from .models import Doctor, Patient, RendezVous,Appointment, Rdv, Consultation
-from .serializers import DoctorSerializer, PatientLoginSerializer, RendezVousSerializer, PatientSerializer,AppointmentSerializer, CreateAppointmentSerializer, RdvSerializer, ConsultationSerializer
+from .models import CustomUser, Doctor, Patient, RendezVous,Appointment, Rdv, Consultation
+from .serializers import DoctorSerializer, CustomUserSerializer, RendezVousSerializer, PatientSerializer,AppointmentSerializer, CreateAppointmentSerializer, RdvSerializer, ConsultationSerializer
 from django.contrib.auth.hashers import make_password
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -13,43 +13,142 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.hashers import check_password
 from django.db.models import Q
-
 from django.http import JsonResponse
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.shortcuts import get_object_or_404
 
 
-class RegisterDoctorView(generics.CreateAPIView):
-    queryset = Doctor.objects.all()
+class DoctorView(viewsets.ModelViewSet):
     serializer_class = DoctorSerializer
-    permission_classes = [AllowAny]
+    queryset = Doctor.objects.all()
+    # filterset_fields = '__all__'
 
-    def perform_create(self, serializer):
-        # Convertir les données de la requête en dictionnaire mutable
-        doctor_data = self.request.data.dict()  # Conversion QueryDict -> dict
-
-        # Supprimer les champs non nécessaires (comme csrfmiddlewaretoken)
-        doctor_data.pop('csrfmiddlewaretoken', None)
-
-        # Hacher le mot de passe
-        doctor_data['password'] = make_password(doctor_data.get('password'))
-
-        # Enregistrement de l'objet Doctor
-        serializer.save(**doctor_data)
-
-class RegisterPatientView(generics.CreateAPIView):
-    queryset = Patient.objects.all()
+class PatientView(viewsets.ModelViewSet):
     serializer_class = PatientSerializer
-    permission_classes = [AllowAny]
+    queryset = Patient.objects.all()
+    # filterset_fields = '__all__'
 
-    def perform_create(self, serializer):
-        patient_data = self.request.data.copy()  # Toujours travailler avec une copie
-        patient_data.pop('csrfmiddlewaretoken', None)  # Supprimer les champs inutiles
-        password = patient_data.get('password')
 
-        if password:
-            patient_data['password'] = make_password(password)
+class RegisterUserView(APIView):
+    
+    def post(self, request):
 
-        # Utiliser le sérialiseur pour valider les données
-        serializer.save(**patient_data)
+        if not CustomUser.objects.filter(email = request.data.get('email')).exists():
+
+            if request.data.get('role') == 'doctor':
+                user_serialized = DoctorSerializer(data=request.data)
+            elif request.data.get('role') == 'patient':
+                user_serialized = PatientSerializer(data=request.data)
+            else:
+                return None
+            
+              
+                
+            if user_serialized.is_valid(): 
+                
+                user_serialized.save()
+                
+                refresh = RefreshToken.for_user(user_serialized)
+
+                return JsonResponse(data= {
+                    "message": "User created successfully"
+                }, status=status.HTTP_201_CREATED,  safe=False)
+            
+            else:
+                return JsonResponse(data=user_serialized.errors ,status=status.HTTP_400_BAD_REQUEST, safe=False)
+
+        else:
+            return JsonResponse("Cet utilisateur existe déja", safe=False)
+
+
+def authenticate(email, password):
+    try:
+        # Vérifier dans les deux modèles
+        user = None
+        if Doctor.objects.filter(email=email).exists():
+            user = Doctor.objects.get(email=email)
+        elif Patient.objects.filter(email=email).exists():
+            user = Patient.objects.get(email=email)
+        
+        # Vérifier le mot de passe
+        if user and user.check_password(password):
+            return user
+    except Exception as e:
+        print(f"Error during authentication: {e}")
+        return None
+
+    return None
+
+class ConexionUserView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        # Authentifier l'utilisateur
+        user = authenticate(email=email, password=password)
+
+        if user and user.is_active:
+            # Générer les tokens JWT
+            refresh = RefreshToken.for_user(user)
+
+            # Identifier le rôle (si nécessaire)
+            role = 'doctor' if isinstance(user, Doctor) else 'patient'
+
+            return JsonResponse({
+                "message": "Login successful",
+                "role": role,  # Inclure le rôle dans la réponse
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+            }, status=status.HTTP_202_ACCEPTED)
+
+        return JsonResponse({"message": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class UserProfileAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        # Structure de la réponse en fonction du rôle
+        data = {
+            "id": user.id,
+            "email": user.email,
+            "role": user.role,
+            "full_name": user.full_name,
+        }
+
+        if user.role == "patient":
+            data.update({
+                "numeroTelephone": user.patient.numeroTelephone,
+                "adresse": user.adresse,
+                "dateNaissance": user.dateNaissance,
+            })
+
+        elif user.role == "doctor":
+            data.update({
+                "numIdentification": user.doctor.numIdentification,
+                "hopital": user.doctor.hopital,
+                "telHopital": user.doctor.telHopital,
+                "adresseHopital": user.doctor.adresseHopital,
+            })
+
+        return Response(data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def protected_view(request):
+    
+    permission_classes=IsAuthenticated
+    print(request)
+    # Cette vue est accessible uniquement aux utilisateurs authentifiés avec un jeton valide
+    user = request.user
+    # print(user.role)
+    if user:
+        user = get_object_or_404(CustomUser, id=user.id)
+        user_serializer = CustomUserSerializer(user)
+    # print(user) 
+    return JsonResponse(data=user_serializer.data, status= status.HTTP_202_ACCEPTED, safe=False)
 
 @api_view(['GET'])
 def list_doctors(request):
@@ -65,99 +164,6 @@ def list_patients(request):
 
 
 
-   
-class PatientLoginView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request, *args, **kwargs):
-        email = request.data.get("email")
-        password = request.data.get("password")
-
-        if not email or not password:
-            return Response(
-                {"detail": "Email et mot de passe sont obligatoires."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Authentification
-        user = authenticate(request, email=email, password=password)
-
-        if user is None:
-            return Response(
-                {"detail": "Adresse e-mail ou mot de passe incorrect."},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-
-        # Vérifiez si l'utilisateur est un patient
-        if not isinstance(user, Patient):
-            return Response(
-                {"detail": "Cet utilisateur n'est pas un patient."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-        # Génération ou récupération du token
-        token, _ = Token.objects.get_or_create(user=user)
-
-        return Response(
-            {"token": token.key, "message": "Connexion réussie."},
-            status=status.HTTP_200_OK,
-        )
-
-class DoctorLoginView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request, *args, **kwargs):
-        email = request.data.get("email")
-        password = request.data.get("password")
-
-        if not email or not password:
-            return Response(
-                {"detail": "Email et mot de passe sont obligatoires."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Authentification
-        user = authenticate(request, email=email, password=password)
-
-        if user is None:
-            return Response(
-                {"detail": "Adresse e-mail ou mot de passe incorrect."},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-
-        # Vérifiez si l'utilisateur est un docteur
-        if not isinstance(user, Doctor):
-            return Response(
-                {"detail": "Cet utilisateur n'est pas un docteur."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-        # Génération ou récupération du token
-        token, _ = Token.objects.get_or_create(user=user)
-
-        return Response(
-            {"token": token.key, "message": "Connexion réussie."},
-            status=status.HTTP_200_OK,
-        )
-
-class DoctorLoginView(APIView):
-    """Vue de connexion pour les docteurs, utilisant la méthode POST."""
-
-    @api_view(['POST'])  # Autorise uniquement les requêtes POST
-    def post(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
-
-        # Authentification par email et mot de passe
-        user = authenticate(request, email=email, password=password)
-
-        if user and user.is_active:
-            # Connexion réussie
-            return JsonResponse({'message': 'Connexion réussie'}, status=status.HTTP_200_OK)
-        else:
-            # Échec de la connexion
-            return JsonResponse({'error': 'Identifiants invalides'}, status=status.HTTP_401_UNAUTHORIZED)
-        
         
 class RendezVousViewSet(viewsets.ModelViewSet):
     queryset = RendezVous.objects.all()
