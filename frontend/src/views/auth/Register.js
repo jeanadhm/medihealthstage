@@ -15,8 +15,8 @@ const Register = () => {
   return (
     <>
       <Navbar transparent />
-      <main>
-        <section style={{ backgroundColor: '#2d3748', paddingBottom: '5rem' }}>
+      <main style={{backgroundColor: '#2d3748'}}>
+        <section style={{ backgroundColor: '#2d3748', paddingBottom: '5rem', marginTop:'4rem' }}>
           <div
             style={{
               bottom: 'auto',
@@ -30,17 +30,7 @@ const Register = () => {
               pointerEvents: 'none',
             }}
           >
-            <svg
-              style={{ position: 'absolute', bottom: 0, overflow: 'hidden' }}
-              xmlns="http://www.w3.org/2000/svg"
-              preserveAspectRatio="none"
-              version="1.1"
-              viewBox="0 0 2560 100"
-              x="0"
-              y="0"
-            >
-              <polygon fill="#2d3748" points="2560 0 2560 100 0 100"></polygon>
-            </svg>
+            
           </div>
         </section>
         <section style={{ backgroundColor: '#2d3748', padding: '6rem 0' }}>
@@ -142,7 +132,7 @@ const PatientForm = ({ navigate }) => {
     try {
       await axios.post('http://127.0.0.1:8000/api/users/patients/', formData);
       setNotification({ message: "Patient enregistré avec succès.", type: "success" });
-      setTimeout(() => navigate('/connexionpat'), 2000);
+      setTimeout(() => navigate('/connexion'), 2000);
     } catch (error) {
       setNotification({ message: `Erreur: ${JSON.stringify(error.response?.data)}`, type: "error" });
     }
@@ -173,8 +163,8 @@ const PatientForm = ({ navigate }) => {
       <Field type="tel" name="numeroTelephone" label="Numéro de Téléphone" value={formData.numeroTelephone} onChange={handleChange} />
       <Field type="password" name="password" label="Mot de Passe" value={formData.password} onChange={handleChange} />
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <button type="submit" style={buttonStyle}>Envoyer</button>
         <button type="button" style={{ ...buttonStyle, backgroundColor: '#e53e3e' }} onClick={handleCancel}>Annuler</button>
+        <button type="submit" style={buttonStyle}>Envoyer</button>
       </div>
     </FormContainer>
   );
@@ -223,7 +213,7 @@ const MedecinForm = ({ navigate }) => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setNotification({ message: "Médecin enregistré avec succès.", type: "success" });
-      setTimeout(() => navigate('/connexiondoc'), 2000);
+      setTimeout(() => navigate('/connexion'), 2000);
     } catch (error) {
       setNotification({ message: `Erreur: ${JSON.stringify(error.response?.data)}`, type: "error" });
     }
@@ -260,8 +250,9 @@ const MedecinForm = ({ navigate }) => {
       <Field type="file" name="documentsVerification" label="Documents de Vérification" onChange={handleChange} />
       <Field type="password" name="password" label="Mot de Passe" value={formData.password} onChange={handleChange} />
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <button type="submit" style={buttonStyle}>Envoyer</button>
-        <button type="button" style={{ ...buttonStyle, backgroundColor: '#e53e3e' }} onClick={handleCancel}>Annuler</button>
+      <button type="button" style={{ ...buttonStyle, backgroundColor: '#e53e3e' }} onClick={handleCancel}>Annuler</button>
+      <button type="submit" style={buttonStyle}>Envoyer</button>
+        
       </div>
     </FormContainer>
   );

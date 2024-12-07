@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Navbar from "components/Navbars/AuthNavbar.js";
+import Footer from "components/Footers/Footer.js";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +11,7 @@ const Login = () => {
   });
 
   const [notification, setNotification] = useState(null);
+  const [loading, setLoading] = useState(false); // Indique le chargement
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -24,85 +27,103 @@ const Login = () => {
       return;
     }
 
+    setLoading(true); // Active l'état de chargement
+
     try {
       const response = await axios.post('http://127.0.0.1:8000/api/login/', formData);
       const { refresh, access, message, role } = response.data;
 
-      // Stocker les jetons dans le localStorage
       localStorage.setItem('accessToken', access);
       localStorage.setItem('refreshToken', refresh);
       localStorage.setItem('userRole', role);
 
-
       setNotification({ type: 'success', message });
 
-      // Rediriger selon le rôle retourné par le backend
-      if (role === 'patient') {
-        navigate('/patient');
-      } else if (role === 'doctor') {
-        navigate('/doctor');
-      } else {
-        setNotification({ type: 'error', message: 'Rôle inconnu, contactez l\'administrateur.' });
-      }
+      setTimeout(() => {
+        if (role === 'patient') {
+          navigate('/patient');
+        } else if (role === 'doctor') {
+          navigate('/doctor');
+        } else {
+          setNotification({ type: 'error', message: 'Rôle inconnu, contactez l\'administrateur.' });
+        }
+      }, 2000); // Simule une attente avant la redirection
     } catch (error) {
       setNotification({
         type: 'error',
-        message: error.response?.data?.message || "Erreur d'authentification",
+        message: 'Email ou mot de passe incorrect', // Message d'erreur personnalisé
       });
+    } finally {
+      setLoading(false); // Désactive l'état de chargement
     }
   };
 
   return (
-    <div style={containerStyle}>
-      <div style={formContainerStyle}>
-        <h2 style={titleStyle}>Connexion</h2>
-        {notification && (
-          <div
-            style={{
-              ...notificationStyle,
-              backgroundColor: notification.type === 'success' ? '#48BB78' : '#F56565',
-            }}
-          >
-            {notification.message}
+    <>
+      <Navbar />
+      <div style={containerStyle}>
+        <div style={formContainerStyle}>
+          <h2 style={titleStyle}>Connexion</h2>
+          {notification && (
+            <div
+              style={{
+                ...notificationStyle,
+                backgroundColor: notification.type === 'success' ? '#48BB78' : '#F56565',
+              }}
+            >
+              {notification.message}
+            </div>
+          )}
+          <form onSubmit={handleSubmit}>
+            <div style={fieldStyle}>
+              <label htmlFor="email" style={labelStyle}>Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                style={inputStyle}
+                placeholder="Entrez votre email"
+              />
+            </div>
+            <div style={fieldStyle}>
+              <label htmlFor="password" style={labelStyle}>Mot de passe</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                style={inputStyle}
+                placeholder="Entrez votre mot de passe"
+              />
+            </div>
+            <button type="submit" style={buttonStyle} disabled={loading}>
+              {loading ? 'Chargement...' : 'Se connecter'}
+            </button>
+          </form>
+          <div style={footerLinkStyle}>
+            <p>
+              Vous n'avez pas de compte ?{' '}
+              <a href="/inscription" style={linkStyle}>Créez-le ici</a>.
+            </p>
           </div>
-        )}
-        <form onSubmit={handleSubmit}>
-          <div style={fieldStyle}>
-            <label htmlFor="email" style={labelStyle}>Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              style={inputStyle}
-            />
-          </div>
-          <div style={fieldStyle}>
-            <label htmlFor="password" style={labelStyle}>Mot de passe</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              style={inputStyle}
-            />
-          </div>
-          <button type="submit" style={buttonStyle}>Se connecter</button>
-        </form>
+        </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 };
 
 // Styles
 const containerStyle = {
   backgroundColor: '#2d3748',
-  height: '100vh',
+  minHeight: 'calc(100vh - 80px)',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
+  padding: '2rem',
   color: '#fff',
 };
 
@@ -117,19 +138,21 @@ const formContainerStyle = {
 
 const titleStyle = {
   textAlign: 'center',
-  marginBottom: '1rem',
-  fontSize: '1.5rem',
+  marginBottom: '1.5rem',
+  fontSize: '1.8rem',
   fontWeight: 'bold',
+  color: '#2d3748',
 };
 
 const fieldStyle = {
-  marginBottom: '1rem',
+  marginBottom: '1.5rem',
 };
 
 const labelStyle = {
   display: 'block',
   marginBottom: '0.5rem',
   color: '#4a5568',
+  fontWeight: 'bold',
 };
 
 const inputStyle = {
@@ -138,6 +161,7 @@ const inputStyle = {
   border: '1px solid #e2e8f0',
   borderRadius: '4px',
   backgroundColor: '#f7fafc',
+  color: '#2d3748', 
   fontSize: '1rem',
   outline: 'none',
 };
@@ -151,12 +175,25 @@ const buttonStyle = {
   fontWeight: 'bold',
   cursor: 'pointer',
   transition: 'background-color 0.2s',
+  opacity: '1',
+};
+
+const footerLinkStyle = {
+  textAlign: 'center',
+  marginTop: '1rem',
+  color: '#2d3748'
+};
+
+const linkStyle = {
+  color: '#2b6cb0',
+  textDecoration: 'none',
+  fontWeight: 'bold',
 };
 
 const notificationStyle = {
   padding: '0.75rem',
   borderRadius: '4px',
-  marginBottom: '1rem',
+  marginBottom: '1.5rem',
   textAlign: 'center',
   color: '#fff',
   fontWeight: 'bold',
