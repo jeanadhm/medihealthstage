@@ -96,42 +96,56 @@ const AnalysisForm = () => {
 
   const styles = {
     form: {
-      backgroundColor: '#ffffff',
-      padding: '20px',
+      backgroundColor: '#1e293b', // bluegray-800 (Fond foncé)
+      padding: '40px', // Augmenter la marge interne pour donner de la place
       borderRadius: '8px',
       boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
-      maxWidth: '500px',
-      margin: '100px auto',
-      fontFamily: 'Arial, sans-serif'
+      maxWidth: '800px',
+      margin: '0 auto', // Centré horizontalement
+      fontFamily: 'Arial, sans-serif',
+      color: '#f1f5f9', // Texte clair (bluegray-100)
+      marginTop: '100px', // Propriété pour déplacer le formulaire vers le bas
+      height: 'auto', // Permet au formulaire de s'adapter
+      minHeight: '600px', // Définir une hauteur minimale pour le formulaire
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'flex-start',
     },
     label: {
       display: 'block',
-      marginBottom: '8px',
-      fontWeight: 'bold',
-      color: '#333'
+      marginBottom: '25px', // Augmenter l'espacement entre les labels
+      fontWeight: '800', // Applique le poids de police 800 pour les labels
+      color: '#f1f5f9' // Texte clair
     },
     input: {
       width: '100%',
-      padding: '10px',
+      padding: '12px', // Plus de padding pour une meilleure lisibilité
       marginBottom: '20px',
-      border: '1px solid #ccc',
+      border: '1px solid #94a3b8', // bluegray-400
       borderRadius: '4px',
-      boxSizing: 'border-box'
+      boxSizing: 'border-box',
+      backgroundColor: '#FFF', // Texte sombre sur fond foncé
+      color: 'black' // Texte clair
     },
     checkbox: {
       marginRight: '10px'
     },
     button: {
-      backgroundColor: '#007bff',
-      color: 'white',
-      padding: '10px 20px',
+      backgroundColor: '#64748b', // bluegray-500
+      color: '#ffffff',
+      padding: '12px 24px', // Plus de padding pour un bouton plus large
       border: 'none',
       borderRadius: '4px',
-      cursor: 'pointer'
+      cursor: 'pointer',
+      transition: 'background-color 0.3s',
+      fontWeight: '800' // Applique le poids de police 800 sur le bouton
+    },
+    buttonHover: {
+      backgroundColor: '#94a3b8' // bluegray-400 pour hover
     },
     successMessage: {
-      color: 'green',
-      fontWeight: 'bold',
+      color: '#22c55e', // Vert pour succès
+      fontWeight: '800', // Applique le poids de police 800 au message de succès
       textAlign: 'center',
       margin: '20px 0'
     }

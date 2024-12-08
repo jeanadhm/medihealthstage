@@ -99,9 +99,21 @@ function AppointmentForm() {
 
       <Paper
         elevation={3}
-        sx={{ maxWidth: 5000, margin: "auto", padding: 4, mt: 14 }}
+        sx={{
+          maxWidth: 600,
+          margin: "auto",
+          padding: 4,
+          mt: 14,
+          backgroundColor: "#1e293b", // bluegray-800 (fond foncé)
+          color: "#e2e8f0", // bluegray-100 (texte clair)
+        }}
       >
-        <Typography variant="h6" gutterBottom align="center">
+        <Typography
+          variant="h6"
+          gutterBottom
+          align="center"
+          sx={{ color: "#e2e8f0", fontWeight: "800" }} // Texte clair pour le titre
+        >
           Prendre un rendez-vous
         </Typography>
 
@@ -113,6 +125,19 @@ function AppointmentForm() {
           onChange={handlePatientChange}
           margin="normal"
           variant="outlined"
+          sx={{
+            backgroundColor: "#fff", // bluegray-600 (fond sombre des champs)
+            color: "#e2e8f0", // texte clair
+            borderColor: "#94a3b8", // bluegray-400 (bordure claire)
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": {
+                borderColor: "#94a3b8", // bluegray-400
+              },
+              "&:hover fieldset": {
+                borderColor: "#64748b", // bluegray-500 (bordure au survol)
+              },
+            },
+          }}
         >
           {patients.map((patient) => (
             <MenuItem
@@ -136,6 +161,19 @@ function AppointmentForm() {
               fullWidth
               margin="normal"
               variant="outlined"
+              sx={{
+                backgroundColor: "#fff", // bluegray-600
+                color: "#e2e8f0", // texte clair
+                borderColor: "#94a3b8", // bordure claire
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "#94a3b8", // bordure claire
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#64748b", // bluegray-500
+                  },
+                },
+              }}
               {...params}
             />
           )}
@@ -152,6 +190,19 @@ function AppointmentForm() {
               fullWidth
               margin="normal"
               variant="outlined"
+              sx={{
+                backgroundColor: "#fff", // bluegray-600
+                color: "#e2e8f0", // texte clair
+                borderColor: "#94a3b8", // bordure claire
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "#94a3b8", // bordure claire
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#64748b", // bluegray-500
+                  },
+                },
+              }}
               {...params}
             />
           )}
@@ -167,6 +218,19 @@ function AppointmentForm() {
           rows={4}
           margin="normal"
           variant="outlined"
+          sx={{
+            backgroundColor: "#374151", // bluegray-600
+            color: "#e2e8f0", // texte clair
+            borderColor: "#94a3b8", // bordure claire
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": {
+                borderColor: "#94a3b8", // bordure claire
+              },
+              "&:hover fieldset": {
+                borderColor: "#64748b", // bluegray-500
+              },
+            },
+          }}
         />
 
         <Button
@@ -174,7 +238,13 @@ function AppointmentForm() {
           color="primary"
           fullWidth
           onClick={handleSubmit}
-          sx={{ mt: 3 }}
+          sx={{
+            mt: 3,
+            backgroundColor: "#64748b", // bluegray-500
+            "&:hover": {
+              backgroundColor: "#94a3b8", // bluegray-400 au survol
+            },
+          }}
         >
           Envoyer
         </Button>

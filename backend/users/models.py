@@ -167,4 +167,4 @@ class Consultation(models.Model):
     pulse = models.PositiveIntegerField(blank=True, null=True)
 
     def __str__(self):
-        return f"Consultation de {self.patient.full_name} le {self.date}"
+        return f"Consultation de {self.patient} le {self.date}"
