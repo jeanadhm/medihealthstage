@@ -126,7 +126,7 @@ function AppointmentForm() {
           margin="normal"
           variant="outlined"
           sx={{
-            backgroundColor: "#fff", // bluegray-600 (fond sombre des champs)
+            backgroundColor: "#FFF", // bluegray-600 (fond sombre des champs)
             color: "#e2e8f0", // texte clair
             borderColor: "#94a3b8", // bluegray-400 (bordure claire)
             "& .MuiOutlinedInput-root": {
@@ -162,8 +162,8 @@ function AppointmentForm() {
               margin="normal"
               variant="outlined"
               sx={{
-                backgroundColor: "#fff", // bluegray-600
-                color: "#e2e8f0", // texte clair
+                backgroundColor: "#FFF", // bluegray-600
+                color: "#FFF", // texte clair
                 borderColor: "#94a3b8", // bordure claire
                 "& .MuiOutlinedInput-root": {
                   "& fieldset": {
@@ -191,8 +191,8 @@ function AppointmentForm() {
               margin="normal"
               variant="outlined"
               sx={{
-                backgroundColor: "#fff", // bluegray-600
-                color: "#e2e8f0", // texte clair
+                backgroundColor: "#FFF", // bluegray-600
+                color: "#FFF", // texte clair
                 borderColor: "#94a3b8", // bordure claire
                 "& .MuiOutlinedInput-root": {
                   "& fieldset": {
@@ -219,7 +219,7 @@ function AppointmentForm() {
           margin="normal"
           variant="outlined"
           sx={{
-            backgroundColor: "#374151", // bluegray-600
+            backgroundColor: "#FFF", // bluegray-600
             color: "#e2e8f0", // texte clair
             borderColor: "#94a3b8", // bordure claire
             "& .MuiOutlinedInput-root": {
