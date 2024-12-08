@@ -35,19 +35,19 @@ function AllAnalyses() {
       const filteredData = {
         common_analyses: analyses.common_analyses.filter(analysis =>
           (analysis.patient_nom ? analysis.patient_nom.toLowerCase() : '').includes(searchTerm.toLowerCase()) ||
-          (analysis.patient_prenom ? analysis.patient_prenom.toLowerCase() : '').includes(searchTerm.toLowerCase())
+          (analysis.patient_prenoms ? analysis.patient_prenoms.toLowerCase() : '').includes(searchTerm.toLowerCase())
         ),
         cholesterol_analyses: analyses.cholesterol_analyses.filter(analysis =>
           (analysis.patient_nom ? analysis.patient_nom.toLowerCase() : '').includes(searchTerm.toLowerCase()) ||
-          (analysis.patient_prenom ? analysis.patient_prenom.toLowerCase() : '').includes(searchTerm.toLowerCase())
+          (analysis.patient_prenoms ? analysis.patient_prenoms.toLowerCase() : '').includes(searchTerm.toLowerCase())
         ),
         ist_analyses: analyses.ist_analyses.filter(analysis =>
           (analysis.patient_nom ? analysis.patient_nom.toLowerCase() : '').includes(searchTerm.toLowerCase()) ||
-          (analysis.patient_prenom ? analysis.patient_prenom.toLowerCase() : '').includes(searchTerm.toLowerCase())
+          (analysis.patient_prenoms ? analysis.patient_prenoms.toLowerCase() : '').includes(searchTerm.toLowerCase())
         ),
         diabetes_analyses: analyses.diabetes_analyses.filter(analysis =>
           (analysis.patient_nom ? analysis.patient_nom.toLowerCase() : '').includes(searchTerm.toLowerCase()) ||
-          (analysis.patient_prenom ? analysis.patient_prenom.toLowerCase() : '').includes(searchTerm.toLowerCase())
+          (analysis.patient_prenoms ? analysis.patient_prenoms.toLowerCase() : '').includes(searchTerm.toLowerCase())
         ),
       };
       setFilteredAnalyses(filteredData);
@@ -118,7 +118,7 @@ function AllAnalyses() {
                       >
                         <TableCell>{analysis.date}</TableCell>
                         <TableCell>Analyse Commune</TableCell>
-                        <TableCell>{analysis.patient_nom} {analysis.patient_prenom}</TableCell>
+                        <TableCell>{analysis.patient_nom} {analysis.patient_prenoms}</TableCell>
                       </TableRow>
 
                       {/* Détails affichés lors du clic sur la ligne */}
@@ -170,7 +170,7 @@ function AllAnalyses() {
                       >
                         <TableCell>{analysis.date}</TableCell>
                         <TableCell>Analyse Cholestérol</TableCell>
-                        <TableCell>{analysis.patient_nom} {analysis.patient_prenom}</TableCell>
+                        <TableCell>{analysis.patient_nom} {analysis.patient_prenoms}</TableCell>
                       </TableRow>
 
                       {/* Détails affichés lors du clic sur la ligne */}
@@ -221,7 +221,7 @@ function AllAnalyses() {
                       >
                         <TableCell>{analysis.date}</TableCell>
                         <TableCell>Analyse IST</TableCell>
-                        <TableCell>{analysis.patient_nom} {analysis.patient_prenom}</TableCell>
+                        <TableCell>{analysis.patient_nom} {analysis.patient_prenoms}</TableCell>
                       </TableRow>
 
                       {/* Détails affichés lors du clic sur la ligne */}
@@ -271,7 +271,7 @@ function AllAnalyses() {
                       >
                         <TableCell>{analysis.date}</TableCell>
                         <TableCell>Analyse Diabète</TableCell>
-                        <TableCell>{analysis.patient_nom} {analysis.patient_prenom}</TableCell>
+                        <TableCell>{analysis.patient_nom} {analysis.patient_prenoms}</TableCell>
                       </TableRow>
 
                       {/* Détails affichés lors du clic sur la ligne */}

@@ -61,7 +61,7 @@ export default function DoctorSidebar() {
             <ul className="md:flex-col md:min-w-full flex flex-col list-none mb-4">
               <li className="items-center">
                 <Link
-                  to="/doctor/settings/profile"
+                  to="/doctor/profiledoc"
                   className="text-xs uppercase py-3 font-bold block"
                 >
                   <i className="fas fa-user-cog mr-2 text-sm"></i> Profile

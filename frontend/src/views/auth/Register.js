@@ -16,7 +16,7 @@ const Register = () => {
     <>
       <Navbar transparent />
       <main style={{backgroundColor: '#2d3748'}}>
-        <section style={{ backgroundColor: '#2d3748', paddingBottom: '5rem', marginTop:'4rem' }}>
+        <section style={{ backgroundColor: '#2d3748', paddingBottom: '3rem', marginTop:'4rem' }}>
           <div
             style={{
               bottom: 'auto',
@@ -24,7 +24,7 @@ const Register = () => {
               left: 0,
               right: 0,
               width: '100%',
-              height: '5rem',
+              height: '6rem',
               position: 'absolute',
               transform: 'translateZ(0)',
               pointerEvents: 'none',
@@ -34,8 +34,8 @@ const Register = () => {
           </div>
         </section>
         <section style={{ backgroundColor: '#2d3748', padding: '6rem 0' }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '-12rem' }}>
+          <div style={{ maxWidth: '1500px', margin: '0 auto', padding: '0 1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '40px' }}>
               <div
                 style={{
                   backgroundColor: '#edf2f7',
@@ -51,15 +51,15 @@ const Register = () => {
                 </h4>
                 <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
                   <RoleOption role="patient" label="Patient" onSelect={handleRoleSelect} />
-                  <RoleOption role="medecin" label="Médecin" onSelect={handleRoleSelect} />
+                  <RoleOption role="doctor" label="Médecin" onSelect={handleRoleSelect} />
                 </div>
               </div>
             </div>
           </div>
         </section>
-        <div style={{ marginBottom: '3rem' }}>
+        <div style={{ marginBottom: '0rem' }}>
           {role === 'patient' && <PatientForm navigate={navigate} />}
-          {role === 'medecin' && <MedecinForm navigate={navigate} />}
+          {role === 'doctor' && <MedecinForm navigate={navigate} />}
         </div>
       </main>
       <Footer />
@@ -175,11 +175,11 @@ const MedecinForm = ({ navigate }) => {
     nom: '',
     prenoms: '',
     email: '',
-    anneeNaissance: '',
+    dateNaissance: '',
     numIdentification: '',
     hopital: '',
     telHopital: '',
-    adresseHopital: '',
+    adresse: '',
     documentsVerification: null,
     password: '',
     role: 'doctor',
@@ -224,11 +224,11 @@ const MedecinForm = ({ navigate }) => {
       nom: '',
       prenoms: '',
       email: '',
-      anneeNaissance: '',
+      dateNaissance: '',
       numIdentification: '',
       hopital: '',
       telHopital: '',
-      adresseHopital: '',
+      adresse: '',
       documentsVerification: null,
       password: '',
       role: 'doctor',
@@ -242,11 +242,11 @@ const MedecinForm = ({ navigate }) => {
       <Field name="nom" label="Nom" value={formData.nom} onChange={handleChange} />
       <Field name="prenoms" label="Prénom" value={formData.prenoms} onChange={handleChange} />
       <Field type="email" name="email" label="Email" value={formData.email} onChange={handleChange} />
-      <Field name="anneeNaissance" label="Année de Naissance" value={formData.anneeNaissance} onChange={handleChange} />
+      <Field type="date" name="dateNaissance" label="Date de Naissance" value={formData.dateNaissance} onChange={handleChange} />
       <Field name="numIdentification" label="Numéro d'Identification" value={formData.numIdentification} onChange={handleChange} />
       <Field name="hopital" label="Hôpital" value={formData.hopital} onChange={handleChange} />
       <Field name="telHopital" label="Téléphone de l'Hôpital" value={formData.telHopital} onChange={handleChange} />
-      <Field name="adresseHopital" label="Adresse de l'Hôpital" value={formData.adresseHopital} onChange={handleChange} />
+      <Field name="adresse" label="Adresse de l'Hôpital" value={formData.adresse} onChange={handleChange} />
       <Field type="file" name="documentsVerification" label="Documents de Vérification" onChange={handleChange} />
       <Field type="password" name="password" label="Mot de Passe" value={formData.password} onChange={handleChange} />
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>

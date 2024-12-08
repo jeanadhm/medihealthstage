@@ -131,7 +131,7 @@ class UserProfileAPIView(APIView):
                 "numIdentification": user.doctor.numIdentification,
                 "hopital": user.doctor.hopital,
                 "telHopital": user.doctor.telHopital,
-                "adresseHopital": user.doctor.adresseHopital,
+                "adresseHopital": user.doctor.adresse,
             })
 
         return Response(data, status=status.HTTP_200_OK)
@@ -210,27 +210,24 @@ class RendezVousViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class AppointmentListCreateView(APIView):
-     def post(self, request):
-        # Récupérer l'ID du patient
+    def post(self, request):
+        # Vérifier si 'patient' est fourni dans les données de la requête
         patient_id = request.data.get('patient')
+        if not patient_id:
+            return Response({"error": "L'ID du patient est requis"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Vérifier si le patient existe
         try:
-            patient = Patient.objects.get(id=patient_id)
+            Patient.objects.get(id=patient_id)
         except Patient.DoesNotExist:
             return Response({"error": "Patient non trouvé"}, status=status.HTTP_404_NOT_FOUND)
-        
-        # Créer le rendez-vous avec le patient
-        appointment_data = {
-            'patient': patient,
-            'date': request.data.get('date'),
-            'time': request.data.get('time'),
-            'instructions': request.data.get('instructions'),
-        }
-        
-        # Serializer
-        serializer = CreateAppointmentSerializer(data=appointment_data)
+
+        # Passer les données au serializer
+        serializer = CreateAppointmentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class RdvCreateView(APIView):
@@ -271,10 +268,10 @@ class HospitalSearchFromDoctorsView(APIView):
         query = request.GET.get('q', '')
         # Rechercher dans les champs hopital, adresseHopital
         doctors = Doctor.objects.filter(
-            Q(hopital__icontains=query) | Q(adresseHopital__icontains=query)
+            Q(hopital__icontains=query) | Q(adresse__icontains=query)
         )
         # Préparer les données pour la réponse
         results = doctors.values(
-            'hopital', 'adresseHopital', 'telHopital'
+            'hopital', 'adresse', 'telHopital'
         ).distinct()
         return Response(results)

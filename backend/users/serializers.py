@@ -74,27 +74,32 @@ class RendezVousSerializer(serializers.ModelSerializer):
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
-    patient = PatientSerializer()
+    patient_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Appointment
-        fields = ['id', 'patient', 'date', 'time', 'instructions']
+        fields = ['id', 'patient', 'date', 'time', 'instructions', 'patient_name']
+
+    def get_patient_name(self, obj):
+        return f"{obj.patient.prenoms} {obj.patient.nom}".strip()
+
 
 class CreateAppointmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
-        fields = ['patient', 'date', 'time', 'instructions']
+        fields = ['patient_id', 'date', 'time', 'instructions']
 
 
 class RdvSerializer(serializers.ModelSerializer):
     patient_name = serializers.SerializerMethodField()
+    patient = serializers.PrimaryKeyRelatedField(queryset=Patient.objects.all())
 
     class Meta:
         model = Rdv
-        fields = ['id', 'patient_name', 'date', 'time', 'instructions', 'status']
+        fields = ['patient','patient_name', 'date', 'time', 'instructions', 'status']
 
     def get_patient_name(self, obj):
-        return f"{obj.patient.prenom} {obj.patient.nom}"  # Remplacez par les champs réels du modèle Patient
+        return f"{obj.patient.prenoms} {obj.patient.nom}"  # Remplacez par les champs réels du modèle Patient
 
 class ConsultationSerializer(serializers.ModelSerializer):
     patient_full_name = serializers.ReadOnlyField(source="patient.full_name")

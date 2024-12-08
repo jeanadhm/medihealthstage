@@ -12,6 +12,7 @@ import AppointmentForm from "views/doctor/rdvdoctor";
 import Chat from "views/doctor/consultations";
 import Allanalyses from "views/doctor/allanalyses";
 import ConsultationForm from "views/doctor/consults";
+import UserProfileDoc from "views/doctor/profiledoc";
 
 
 export default function Doctor() {
@@ -29,6 +30,7 @@ export default function Doctor() {
             <Route path="rdvs" element={<AppointmentList />} />
             <Route path="analyses/all" element={<Allanalyses />} />
             <Route path="consults" element={<ConsultationForm />} />
+            <Route path="profiledoc" element={<UserProfileDoc />} />
             
             
             {/* Redirection pour les chemins invalides */}

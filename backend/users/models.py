@@ -26,9 +26,35 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         return self._create_user(email, password, **extra_fields)
 
+class CustomUserManager(BaseUserManager):
+    def _create_user(self, email, password, **extra_fields):
+        if not email:
+            raise ValueError("L'adresse email doit être fournie")
+        if not password:
+            raise ValueError('Un mot de passe doit être fourni')
+        
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_user(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', False)
+        extra_fields.setdefault('is_active', True)
+        extra_fields.setdefault('is_superuser', False)
+        return self._create_user(email, password, **extra_fields)
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_active', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self._create_user(email, password, **extra_fields)
+
+
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     ROLE_CHOICES = (
-        ('doctor', 'Doctor'),
+        ('doctor', 'Docteur'),
         ('patient', 'Patient'),
     )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
@@ -59,6 +85,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         """Retourne le nom complet."""
         return f"{self.nom} {self.prenoms}".strip()
 
+    @property
+    def user_id(self):
+        """Retourne l'ID unique de l'utilisateur."""
+        return self.id  # Utilise l'ID standard généré par Django
+
 class Patient(CustomUser):
     numeroTelephone = models.CharField(max_length=20, null=True, blank=True, default='0000000000')
 
@@ -75,7 +106,6 @@ class Doctor(CustomUser):
     numIdentification = models.CharField(max_length=100, unique=True, null=True, blank=True, default='Aucun')
     hopital = models.CharField(max_length=100, null=True, blank=True, default='Inconnu')
     telHopital = models.CharField(max_length=20, null=True, blank=True, default='0000000000')
-    adresseHopital = models.TextField(null=True, blank=True, default='')
     documentsVerification = models.FileField(upload_to='documents/', null=True, blank=True)
 
     class Meta:
@@ -86,6 +116,7 @@ class Doctor(CustomUser):
         """Assure que le rôle est défini comme 'doctor'."""
         self.role = 'doctor'
         super().save(*args, **kwargs)
+
 
 class RendezVous(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="rdv")

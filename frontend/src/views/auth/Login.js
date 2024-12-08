@@ -118,6 +118,7 @@ const Login = () => {
 
 // Styles
 const containerStyle = {
+  marginTop: 30,
   backgroundColor: '#2d3748',
   minHeight: 'calc(100vh - 80px)',
   display: 'flex',

@@ -50,8 +50,21 @@ const PatientsList = () => {
 
   const handleCreatePatient = async (e) => {
     e.preventDefault();
+  
+    // Vérification des données avant l'envoi
+    if (!newPatient.nom || !newPatient.prenoms || !newPatient.email || !newPatient.numeroTelephone || !newPatient.password) {
+      alert("Veuillez remplir tous les champs obligatoires.");
+      return;
+    }
+  
+    // Assignation du rôle par défaut si nécessaire
+    if (!newPatient.role) {
+      newPatient.role = 'patient';  // Assurez-vous que role est correctement défini avant l'envoi
+    }
+  
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/register/patient/', newPatient);
+      const response = await axios.post('http://127.0.0.1:8000/api/users/patients/', newPatient);
+      console.log(response.data);  // Vérification de la réponse pour voir si le rôle est bien transmis
       setPatients([...patients, response.data]);
       setShowCreateForm(false);
       setNewPatient({
@@ -61,12 +74,18 @@ const PatientsList = () => {
         adresse: '',
         email: '',
         numeroTelephone: '',
+        role: 'patient', 
         password: 'nopassword',
       });
     } catch (err) {
       console.error('Erreur lors de la création du patient', err);
+      if (err.response) {
+        alert(`Erreur : ${err.response.data.detail || err.response.data.message}`);
+      }
     }
   };
+  
+  
 
   
   if (loading) {
