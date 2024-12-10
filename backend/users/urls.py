@@ -1,9 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import DoctorView, PatientView,ConexionUserView, RegisterUserView, list_doctors, list_patients, RendezVousViewSet,AppointmentListCreateView, RdvCreateView, list_appointments,update_appointment_status, ConsultationListCreateView, HospitalSearchFromDoctorsView, UserProfileAPIView
+from .views import DoctorView, PatientView,ConexionUserView, RegisterUserView, list_doctors, list_patients, RendezVousViewSet,AppointmentListCreateView, RdvCreateView, list_appointments,update_appointment_status, ConsultationListCreateView, HospitalSearchFromDoctorsView, UserProfileAPIView, DemandesAPIView
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
+
 )
 
 # Créer un routeur
@@ -29,4 +30,6 @@ urlpatterns = [
     path('profile/', UserProfileAPIView.as_view(), name='user-profile'),
     path('token/refresh/', TokenRefreshView.as_view()),
     path('token/verify/', TokenVerifyView.as_view()),
+    path('demandes/', DemandesAPIView.as_view(), name='demandes-list'),
+    path('demandes/<int:pk>/', DemandesAPIView.as_view(), name='demandes-detail'),
 ]

@@ -114,6 +114,7 @@ class Doctor(CustomUser):
     hopital = models.CharField(max_length=100, null=True, blank=True, default='Inconnu')
     telHopital = models.CharField(max_length=20, null=True, blank=True, default='0000000000')
     documentsVerification = models.FileField(upload_to='documents/', null=True, blank=True)
+    adresseHopital = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         verbose_name = "Docteur"
@@ -190,3 +191,21 @@ class Consultation(models.Model):
 
     def __str__(self):
         return f"Consultation de {self.patient.nom}{self.patient.prenoms} le {self.date}"
+
+    
+class Demandes(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'En attente'),
+        ('validated', 'Validé'),
+        ('rescheduled', 'Reporté'),
+    ]
+
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="demandes_patient")
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name="demandes_doctor")
+    date = models.DateField()
+    time = models.TimeField()
+    instructions = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+
+    def __str__(self):
+        return f"Demande - {self.patient.full_name} avec {self.doctor.full_name} le {self.date} à {self.time}"

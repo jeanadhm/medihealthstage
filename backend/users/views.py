@@ -3,8 +3,8 @@ from rest_framework import generics
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
-from .models import CustomUser, Doctor, Patient, RendezVous,Appointment, Rdv, Consultation
-from .serializers import DoctorSerializer, CustomUserSerializer, RendezVousSerializer, PatientSerializer,AppointmentSerializer, CreateAppointmentSerializer, RdvSerializer, ConsultationSerializer
+from .models import CustomUser, Doctor, Patient, RendezVous,Appointment, Rdv, Consultation, Demandes
+from .serializers import DoctorSerializer, CustomUserSerializer, RendezVousSerializer, PatientSerializer,AppointmentSerializer, CreateAppointmentSerializer, RdvSerializer, ConsultationSerializer, DemandesSerializer
 from django.contrib.auth.hashers import make_password
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -305,3 +305,41 @@ class HospitalSearchFromDoctorsView(APIView):
             'hopital', 'adresse', 'telHopital'
         ).distinct()
         return Response(results)
+
+
+class DemandesAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        if user.role == 'doctor':  # Assurez-vous que les rôles sont correctement définis
+            demandes = Demandes.objects.filter(doctor=user)
+        elif user.role == 'patient':
+            demandes = Demandes.objects.filter(patient=user)
+        else:
+            return Response({'error': 'Accès non autorisé.'}, status=status.HTTP_403_FORBIDDEN)
+        
+        serializer = DemandesSerializer(demandes, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        data = request.data
+        data['patient'] = request.user.id  # Associer automatiquement la demande au patient connecté
+        serializer = DemandesSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
+        try:
+            demande = Demandes.objects.get(id=pk, doctor=request.user)
+        except Demandes.DoesNotExist:
+            return Response({'error': 'Demande introuvable ou non autorisée.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if 'status' not in request.data:
+            return Response({'error': 'Statut requis.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        demande.status = request.data['status']
+        demande.save()
+        return Response({'message': f"Demande mise à jour avec le statut '{demande.get_status_display()}'."}, status=status.HTTP_200_OK)
