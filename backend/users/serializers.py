@@ -24,14 +24,28 @@ class CustomUserSerializer(serializers.ModelSerializer):
 class PatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
-        fields = '__all__'  
+        fields = '__all__'
 
     def create(self, validated_data):
-        password = validated_data.pop('password')
+        # Extraire les relations many-to-many si elles existent
+        groups_data = validated_data.pop('groups', None)
+        permissions_data = validated_data.pop('user_permissions', None)
+        
+        # Gestion du mot de passe
+        password = validated_data.pop('password', None)
         user = self.Meta.model(**validated_data)
-        if password is not None : 
+
+        # Définir le mot de passe si fourni
+        if password:
             user.set_password(password)
         user.save()
+
+        # Gérer les groupes et permissions
+        if groups_data:
+            user.groups.set(groups_data)
+        if permissions_data:
+            user.user_permissions.set(permissions_data)
+
         return user
 
     
@@ -96,7 +110,7 @@ class RdvSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Rdv
-        fields = ['patient','patient_name', 'date', 'time', 'instructions', 'status']
+        fields = '__all__'
 
     def get_patient_name(self, obj):
         return f"{obj.patient.prenoms} {obj.patient.nom}"  # Remplacez par les champs réels du modèle Patient
@@ -106,5 +120,5 @@ class ConsultationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Consultation
-        fields = ['id', 'patient', 'patient_full_name', 'date', 'symptoms', 'temperature', 'blood_pressure', 'pulse']
+        fields = '__all__'
 

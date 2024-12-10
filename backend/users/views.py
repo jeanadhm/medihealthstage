@@ -85,6 +85,9 @@ class ConexionUserView(APIView):
         email = request.data.get('email')
         password = request.data.get('password')
 
+        if not email or not password:
+            return JsonResponse({"message": "Email and password are required."}, status=status.HTTP_400_BAD_REQUEST)
+
         # Authentifier l'utilisateur
         user = authenticate(email=email, password=password)
 
@@ -92,17 +95,22 @@ class ConexionUserView(APIView):
             # Générer les tokens JWT
             refresh = RefreshToken.for_user(user)
 
-            # Identifier le rôle (si nécessaire)
+            # Identifier le rôle de l'utilisateur
             role = 'doctor' if isinstance(user, Doctor) else 'patient'
 
+            # Récupérer l'ID de l'utilisateur (ou du docteur)
+            user_id = user.id
+
+            # Ajouter l'ID de l'utilisateur dans la réponse
             return JsonResponse({
                 "message": "Login successful",
                 "role": role,  # Inclure le rôle dans la réponse
+                "userId": user_id,  # ID de l'utilisateur (docteur ou patient)
                 "refresh": str(refresh),
                 "access": str(refresh.access_token),
             }, status=status.HTTP_202_ACCEPTED)
 
-        return JsonResponse({"message": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+        return JsonResponse({"message": "Invalid credentials or account not active."}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class UserProfileAPIView(APIView):
@@ -158,12 +166,16 @@ def list_doctors(request):
 
 @api_view(['GET'])
 def list_patients(request):
-    patients = Patient.objects.all()
-    serializer = PatientSerializer(patients, many=True)
-    return Response(serializer.data)
-
-
-
+    # Récupérer l'ID du docteur envoyé depuis le frontend (localStorage)
+    doctor_id = request.query_params.get('doctorId')  # Récupérer depuis la requête GET
+    
+    if doctor_id:
+        # Filtrer les patients par l'ID du docteur
+        patients = Patient.objects.filter(created_by=doctor_id)
+        serializer = PatientSerializer(patients, many=True)
+        return Response(serializer.data)
+    else:
+        return Response({"detail": "Doctor ID is required"}, status=400)
         
 class RendezVousViewSet(viewsets.ModelViewSet):
     queryset = RendezVous.objects.all()
@@ -242,9 +254,18 @@ class RdvCreateView(APIView):
 
 @api_view(['GET'])
 def list_appointments(request):
-    appointments = Rdv.objects.all().order_by('date', 'time')
-    serializer = RdvSerializer(appointments, many=True)
-    return Response(serializer.data)
+    doctor_id = request.query_params.get('doctorId')  # Récupérer l'ID du docteur depuis les paramètres de la requête
+    
+    if doctor_id:
+        try:
+            appointments = Rdv.objects.filter(created_by_id=doctor_id).order_by('date', 'time')  # Filtrer par docteur
+            serializer = RdvSerializer(appointments, many=True)
+            return Response(serializer.data)
+        except Rdv.DoesNotExist:
+            return Response({"detail": "Aucun rendez-vous trouvé pour ce docteur."}, status=404)
+    else:
+        return Response({"detail": "L'ID du docteur est requis"}, status=400)
+
 
 @api_view(['PATCH'])
 def update_appointment_status(request, pk):

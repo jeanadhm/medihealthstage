@@ -92,6 +92,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class Patient(CustomUser):
     numeroTelephone = models.CharField(max_length=20, null=True, blank=True, default='0000000000')
+    created_by = models.ForeignKey(
+        'Doctor',  # Remplacez 'User' par 'Doctor' si vous voulez qu'un docteur soit le créateur
+        on_delete=models.CASCADE,
+        related_name='patients_created',
+        null=True,  
+        blank=True   # Fournissez un nom unique pour la relation inverse
+    )
 
     class Meta:
         verbose_name = "Patient"
@@ -123,9 +130,10 @@ class RendezVous(models.Model):
     date = models.DateField()
     time = models.TimeField()
     instructions = models.TextField(blank=True, null=True)
+    
 
     def __str__(self):
-        return f"Rendez-vous avec {self.patient} le {self.date} à {self.time}"
+        return f"Rendez-vous avec {self.patient.nom} le {self.date} à {self.time}"
 
 
 class Appointment(models.Model):
@@ -148,6 +156,13 @@ class Rdv(models.Model):
     date = models.DateField()
     time = models.TimeField()
     instructions = models.TextField(blank=True, null=True)
+    created_by = models.ForeignKey(
+        'Doctor',  # Remplacez 'User' par 'Doctor' si vous voulez qu'un docteur soit le créateur
+        on_delete=models.CASCADE,
+        related_name='rdv_created',  # Fournissez un nom unique pour la relation inverse
+        null=True,  
+        blank=True 
+    )
     status = models.CharField(
         max_length=10,
         choices=STATUS_CHOICES,
@@ -155,7 +170,7 @@ class Rdv(models.Model):
     )
 
     def __str__(self):
-        return f"Rendez-vous de {self.patient} le {self.date} à {self.time}"
+        return f"Rendez-vous de {self.patient.nom}{self.patient.prenoms} le {self.date} à {self.time}"
 
 
 class Consultation(models.Model):
@@ -165,6 +180,13 @@ class Consultation(models.Model):
     temperature = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     blood_pressure = models.CharField(max_length=20, blank=True, null=True)
     pulse = models.PositiveIntegerField(blank=True, null=True)
+    created_by = models.ForeignKey(
+        'Doctor',  # Remplacez 'User' par 'Doctor' si vous voulez qu'un docteur soit le créateur
+        on_delete=models.CASCADE,
+        related_name='consultation_created',
+        null=True,  
+        blank=True  
+    )
 
     def __str__(self):
-        return f"Consultation de {self.patient} le {self.date}"
+        return f"Consultation de {self.patient.nom}{self.patient.prenoms} le {self.date}"

@@ -8,9 +8,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.views.decorators.http import require_POST
 from django.conf import settings
-from .models import CommonAnalysis, CholesterolAnalysis, IstAnalysis, DiabetesAnalysis, Dossier
-from .serializers import CommonAnalysisSerializer, CholesterolAnalysisSerializer, IstAnalysisSerializer, DiabetesAnalysisSerializer
-from users.models import Patient
+from .models import CommonAnalysis, CholesterolAnalysis, IstAnalysis, DiabetesAnalysis, DossierMedical
+from .serializers import CommonAnalysisSerializer, CholesterolAnalysisSerializer, IstAnalysisSerializer, DiabetesAnalysisSerializer, DossierMedicalSerializer
+from users.models import Patient, Doctor, Rdv, Consultation
 # Vues pour les analyses courantes
 class CommonAnalysisListCreateView(generics.ListCreateAPIView):
     queryset = CommonAnalysis.objects.all()
@@ -19,6 +19,16 @@ class CommonAnalysisListCreateView(generics.ListCreateAPIView):
 class CommonAnalysisDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CommonAnalysis.objects.all()
     serializer_class = CommonAnalysisSerializer
+
+    def get_object(self):
+        doctor_id = self.request.query_params.get('doctorId')  # Obtenez l'ID du médecin depuis les paramètres de la requête
+        obj = super().get_object()  # Récupère l'objet via la méthode standard
+
+        # Vérifiez si le médecin est bien celui qui a créé l'analyse
+        if doctor_id and obj.created_by_id != int(doctor_id):
+            raise PermissionDenied("Vous n'êtes pas autorisé à voir cette analyse.")  # Erreur si le médecin n'est pas le bon
+
+        return obj
 
 # Vues pour les analyses de cholestérol
 class CholesterolAnalysisListCreateView(generics.ListCreateAPIView):
@@ -29,6 +39,16 @@ class CholesterolAnalysisDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CholesterolAnalysis.objects.all()
     serializer_class = CholesterolAnalysisSerializer
 
+    def get_object(self):
+        doctor_id = self.request.query_params.get('doctorId')  # Obtenez l'ID du médecin depuis les paramètres de la requête
+        obj = super().get_object()  # Récupère l'objet via la méthode standard
+
+        # Vérifiez si le médecin est bien celui qui a créé l'analyse
+        if doctor_id and obj.created_by_id != int(doctor_id):
+            raise PermissionDenied("Vous n'êtes pas autorisé à voir cette analyse.")  # Erreur si le médecin n'est pas le bon
+
+        return obj
+
 # Vues pour les analyses IST
 class IstAnalysisListCreateView(generics.ListCreateAPIView):
     queryset = IstAnalysis.objects.all()
@@ -38,6 +58,16 @@ class IstAnalysisDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = IstAnalysis.objects.all()
     serializer_class = IstAnalysisSerializer
 
+    def get_object(self):
+        doctor_id = self.request.query_params.get('doctorId')  # Obtenez l'ID du médecin depuis les paramètres de la requête
+        obj = super().get_object()  # Récupère l'objet via la méthode standard
+
+        # Vérifiez si le médecin est bien celui qui a créé l'analyse
+        if doctor_id and obj.created_by_id != int(doctor_id):
+            raise PermissionDenied("Vous n'êtes pas autorisé à voir cette analyse.")  # Erreur si le médecin n'est pas le bon
+
+        return obj
+
 # Vues pour les analyses de diabète
 class DiabetesAnalysisListCreateView(generics.ListCreateAPIView):
     queryset = DiabetesAnalysis.objects.all()
@@ -46,6 +76,16 @@ class DiabetesAnalysisListCreateView(generics.ListCreateAPIView):
 class DiabetesAnalysisDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = DiabetesAnalysis.objects.all()
     serializer_class = DiabetesAnalysisSerializer
+
+    def get_object(self):
+        doctor_id = self.request.query_params.get('doctorId')  # Obtenez l'ID du médecin depuis les paramètres de la requête
+        obj = super().get_object()  # Récupère l'objet via la méthode standard
+
+        # Vérifiez si le médecin est bien celui qui a créé l'analyse
+        if doctor_id and obj.created_by_id != int(doctor_id):
+            raise PermissionDenied("Vous n'êtes pas autorisé à voir cette analyse.")  # Erreur si le médecin n'est pas le bon
+
+        return obj
 
 
 def save_pdf(patient_name, analysis_data, analysis_type):
@@ -90,7 +130,7 @@ def save_analysis(request):
         
         file_path = save_pdf(patient_name, analysis_data, analysis_type)
         
-        dossier = Dossier(patient=patient, nom_dossier=f"Dossier de {patient.nom} {patient.prenom}", pdf=file_path)
+        dossier = DossierMedical(patient=patient, nom_dossier=f"Dossier de {patient.nom} {patient.prenoms}", pdf=file_path)
         dossier.save()
         
         return JsonResponse({"message": "Résultat entré avec succès", "file_path": file_path})
@@ -100,19 +140,85 @@ def save_analysis(request):
     
 class AllAnalysesListView(APIView):
     def get(self, request, *args, **kwargs):
-        common_analyses = CommonAnalysis.objects.all()
-        cholesterol_analyses = CholesterolAnalysis.objects.all()
-        ist_analyses = IstAnalysis.objects.all()
-        diabetes_analyses = DiabetesAnalysis.objects.all()
+        # Récupérer l'ID du médecin passé dans l'URL
+        doctor_id = request.query_params.get('doctorId')
 
+        if not doctor_id:
+            return Response({"error": "Doctor ID is required"}, status=400)
+
+        # Vérifier que le médecin existe avec cet ID
+        try:
+            doctor = Doctor.objects.get(id=doctor_id)
+        except Doctor.DoesNotExist:
+            return Response({"error": "Doctor not found"}, status=404)
+
+        # Filtrer les analyses en fonction de l'ID du médecin
+        common_analyses = CommonAnalysis.objects.filter(doctor_id=doctor.id)
+        cholesterol_analyses = CholesterolAnalysis.objects.filter(doctor_id=doctor.id)
+        ist_analyses = IstAnalysis.objects.filter(doctor_id=doctor.id)
+        diabetes_analyses = DiabetesAnalysis.objects.filter(doctor_id=doctor.id)
+
+        # Sérialiser les analyses filtrées
         common_serializer = CommonAnalysisSerializer(common_analyses, many=True)
         cholesterol_serializer = CholesterolAnalysisSerializer(cholesterol_analyses, many=True)
         ist_serializer = IstAnalysisSerializer(ist_analyses, many=True)
         diabetes_serializer = DiabetesAnalysisSerializer(diabetes_analyses, many=True)
 
+        # Retourner les résultats filtrés pour ce médecin
         return Response({
             "common_analyses": common_serializer.data,
             "cholesterol_analyses": cholesterol_serializer.data,
             "ist_analyses": ist_serializer.data,
             "diabetes_analyses": diabetes_serializer.data,
-        }) 
+        })
+    
+
+
+class CreateOrUpdateDossierMedicalView(APIView):
+    
+
+    def post(self, request):
+        doctor = request.user  # Docteur connecté
+        patient_id = request.data.get('patient')  # ID du patient
+        patient = Patient.objects.get(id=patient_id)
+
+        # Créer ou récupérer un dossier médical
+        dossier, created = DossierMedical.objects.get_or_create(patient=patient, doctor=doctor)
+
+        # Ajouter des analyses au dossier médical
+        common_analyses_data = request.data.get('common_analyses', [])
+        cholesterol_analyses_data = request.data.get('cholesterol_analyses', [])
+        ist_analyses_data = request.data.get('ist_analyses', [])
+        diabetes_analyses_data = request.data.get('diabetes_analyses', [])
+
+        for analysis_data in common_analyses_data:
+            analysis = CommonAnalysis.objects.get(id=analysis_data)
+            dossier.add_common_analysis(analysis)
+
+        for analysis_data in cholesterol_analyses_data:
+            analysis = CholesterolAnalysis.objects.get(id=analysis_data)
+            dossier.add_cholesterol_analysis(analysis)
+
+        for analysis_data in ist_analyses_data:
+            analysis = IstAnalysis.objects.get(id=analysis_data)
+            dossier.add_ist_analysis(analysis)
+
+        for analysis_data in diabetes_analyses_data:
+            analysis = DiabetesAnalysis.objects.get(id=analysis_data)
+            dossier.add_diabetes_analysis(analysis)
+
+        # Ajouter des rendez-vous et des consultations
+        rendezvous_data = request.data.get('rendezvous', [])
+        consultations_data = request.data.get('consultations', [])
+
+        for rv_data in rendezvous_data:
+            rendezvous = Rdv.objects.get(id=rv_data)
+            dossier.add_rendezvous(rendezvous)
+
+        for consultation_data in consultations_data:
+            consultation = Consultation.objects.get(id=consultation_data)
+            dossier.add_consultation(consultation)
+
+        # Retourner le dossier médical
+        serializer = DossierMedicalSerializer(dossier)
+        return Response(serializer.data, status=200)

@@ -1,6 +1,9 @@
 from rest_framework import serializers
-from .models import CommonAnalysis, CholesterolAnalysis, IstAnalysis, DiabetesAnalysis
-from users.models import Patient
+from .models import CommonAnalysis, CholesterolAnalysis, IstAnalysis, DiabetesAnalysis, DossierMedical, Consultation, Rdv
+from users.models import Patient, Doctor
+from django.db import models
+
+
 
 
 class CommonAnalysisSerializer(serializers.ModelSerializer):
@@ -63,3 +66,9 @@ class DiabetesAnalysisSerializer(serializers.ModelSerializer):
         if obj.patient:
             return obj.patient.full_name
         return "N/A"
+
+
+class DossierMedicalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DossierMedical
+        fields = ['id', 'patient', 'doctor', 'created_at', 'updated_at', 'common_analyses', 'cholesterol_analyses', 'ist_analyses', 'diabetes_analyses', 'consultations', 'rendezvous']
