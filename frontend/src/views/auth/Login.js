@@ -23,37 +23,46 @@ const Login = () => {
     e.preventDefault();
   
     if (!formData.email || !formData.password) {
-      setNotification({ type: 'error', message: 'Tous les champs sont obligatoires' });
+      setNotification({ type: "error", message: "Tous les champs sont obligatoires" });
       return;
     }
   
     setLoading(true); // Active l'état de chargement
   
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/login/', formData);
-      const { refresh, access, message, role, userId } = response.data;  // Inclure l'ID du docteur dans la réponse
+      const response = await axios.post("http://127.0.0.1:8000/api/login/", formData);
+      const { refresh, access, message, role, userId } = response.data; // Inclure l'ID de l'utilisateur
   
       // Stockage des informations de connexion dans localStorage
-      localStorage.setItem('accessToken', access);
-      localStorage.setItem('refreshToken', refresh);
-      localStorage.setItem('userRole', role);
-      localStorage.setItem('doctorId', userId);  // Enregistrez l'ID du docteur ici
+      localStorage.setItem("accessToken", access);
+      localStorage.setItem("refreshToken", refresh);
+      localStorage.setItem("userRole", role);
   
-      setNotification({ type: 'success', message });
+      // Enregistrez uniquement l'ID correspondant au rôle
+      if (role === "patient") {
+        localStorage.setItem("patientId", userId);
+      } else if (role === "doctor") {
+        localStorage.setItem("doctorId", userId);
+      }
+  
+      setNotification({ type: "success", message });
   
       setTimeout(() => {
-        if (role === 'patient') {
-          navigate('/patient');
-        } else if (role === 'doctor') {
-          navigate('/doctor');
+        if (role === "patient") {
+          navigate("/patient");
+        } else if (role === "doctor") {
+          navigate("/doctor");
         } else {
-          setNotification({ type: 'error', message: 'Rôle inconnu, contactez l\'administrateur.' });
+          setNotification({
+            type: "error",
+            message: "Rôle inconnu, contactez l'administrateur.",
+          });
         }
       }, 2000); // Simule une attente avant la redirection
     } catch (error) {
       setNotification({
-        type: 'error',
-        message: 'Email ou mot de passe incorrect', // Message d'erreur personnalisé
+        type: "error",
+        message: "Email ou mot de passe incorrect", // Message d'erreur personnalisé
       });
     } finally {
       setLoading(false); // Désactive l'état de chargement

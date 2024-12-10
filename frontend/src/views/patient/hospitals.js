@@ -70,7 +70,7 @@ const Hospitals = () => {
           <ListItem key={index} divider>
             <ListItemText
               primary={hospital.hopital || "Nom non disponible"}
-              secondary={`Adresse: ${hospital.adresseHopital || "Non spécifiée"} | Téléphone: ${hospital.telHopital || "Non disponible"}`}
+              secondary={`Adresse: ${hospital.adresse || "Non spécifiée"} | Téléphone: ${hospital.telHopital || "Non disponible"}`}
             />
           </ListItem>
         ))}

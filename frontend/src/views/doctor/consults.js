@@ -128,7 +128,7 @@ const ConsultationForm = ({ doctorId }) => { // Passez l'ID du médecin comme pr
         >
           {patients.map((patient) => (
             <MenuItem key={patient.id} value={patient.id}>
-              {patient.prenom} {patient.nom}
+              {patient.prenoms} {patient.nom}
             </MenuItem>
           ))}
         </TextField>

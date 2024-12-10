@@ -195,9 +195,9 @@ class Consultation(models.Model):
     
 class Demandes(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'En attente'),
-        ('validated', 'Validé'),
-        ('rescheduled', 'Reporté'),
+        ('En attente', 'En attente'),
+        ('Validé', 'Validé'),
+        ('Reporté', 'Reporté'),
     ]
 
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="demandes_patient")
@@ -205,7 +205,7 @@ class Demandes(models.Model):
     date = models.DateField()
     time = models.TimeField()
     instructions = models.TextField(blank=True, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='En attente')
 
     def __str__(self):
         return f"Demande - {self.patient.full_name} avec {self.doctor.full_name} le {self.date} à {self.time}"

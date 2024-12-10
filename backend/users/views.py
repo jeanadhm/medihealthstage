@@ -308,24 +308,13 @@ class HospitalSearchFromDoctorsView(APIView):
 
 
 class DemandesAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def get(self, request):
-        user = request.user
-        if user.role == 'doctor':  # Assurez-vous que les rôles sont correctement définis
-            demandes = Demandes.objects.filter(doctor=user)
-        elif user.role == 'patient':
-            demandes = Demandes.objects.filter(patient=user)
-        else:
-            return Response({'error': 'Accès non autorisé.'}, status=status.HTTP_403_FORBIDDEN)
-        
+        demandes = Demandes.objects.all()
         serializer = DemandesSerializer(demandes, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        data = request.data
-        data['patient'] = request.user.id  # Associer automatiquement la demande au patient connecté
-        serializer = DemandesSerializer(data=data)
+        serializer = DemandesSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -333,9 +322,9 @@ class DemandesAPIView(APIView):
 
     def patch(self, request, pk):
         try:
-            demande = Demandes.objects.get(id=pk, doctor=request.user)
+            demande = Demandes.objects.get(id=pk)
         except Demandes.DoesNotExist:
-            return Response({'error': 'Demande introuvable ou non autorisée.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Demande introuvable.'}, status=status.HTTP_404_NOT_FOUND)
 
         if 'status' not in request.data:
             return Response({'error': 'Statut requis.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -343,3 +332,44 @@ class DemandesAPIView(APIView):
         demande.status = request.data['status']
         demande.save()
         return Response({'message': f"Demande mise à jour avec le statut '{demande.get_status_display()}'."}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def list_demandes_patient(request):
+    # Récupérer l'ID du patient depuis les paramètres de la requête GET
+    patient_id = request.query_params.get('patientId')  # Exemple : ?patientId=1
+
+    if patient_id:
+        try:
+            # Filtrer les demandes par l'ID du patient
+            demandes = Demandes.objects.filter(patient_id=patient_id)
+
+            # Créer une liste de demandes avec les informations du docteur et le statut
+            demandes_data = []
+            for demande in demandes:
+                doctor = demande.doctor  # Ici, doctor est une relation ForeignKey (assurez-vous que c'est bien un objet, pas un ID)
+
+                # Si la relation est correcte, doctor sera un objet Doctor
+                doctor_name = f"{doctor.nom} {doctor.prenoms}"
+
+                # Récupérer le statut de la demande
+                status = demande.status
+
+                demande_data = {
+                    'id': demande.id,
+                    'patient_id': demande.patient_id,
+                    'date': demande.date,
+                    'time': demande.time,
+                    'instructions': demande.instructions,
+                    'doctor_name': doctor_name, 
+                    'status': status  
+                }
+
+                demandes_data.append(demande_data)
+
+            return Response(demandes_data)
+
+        except Demandes.DoesNotExist:
+            return Response({"detail": "Aucune demande trouvée pour ce patient."}, status=404)
+    else:
+        return Response({"detail": "Patient ID is required"}, status=400)

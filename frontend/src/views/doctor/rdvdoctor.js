@@ -143,7 +143,7 @@ const AppointmentForm = () => {
         >
           {patients.map((patient) => (
             <MenuItem key={patient.id} value={patient.id}>
-              {patient.prenom} {patient.nom}
+              {patient.prenoms} {patient.nom}
             </MenuItem>
           ))}
         </TextField>

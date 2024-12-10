@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import DoctorView, PatientView,ConexionUserView, RegisterUserView, list_doctors, list_patients, RendezVousViewSet,AppointmentListCreateView, RdvCreateView, list_appointments,update_appointment_status, ConsultationListCreateView, HospitalSearchFromDoctorsView, UserProfileAPIView, DemandesAPIView
+from .views import DoctorView, PatientView,ConexionUserView, RegisterUserView, list_doctors, list_patients, RendezVousViewSet,AppointmentListCreateView, RdvCreateView, list_appointments,update_appointment_status, ConsultationListCreateView, HospitalSearchFromDoctorsView, UserProfileAPIView, DemandesAPIView,list_demandes_patient
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
@@ -32,4 +32,5 @@ urlpatterns = [
     path('token/verify/', TokenVerifyView.as_view()),
     path('demandes/', DemandesAPIView.as_view(), name='demandes-list'),
     path('demandes/<int:pk>/', DemandesAPIView.as_view(), name='demandes-detail'),
+    path('rdvs/patient/all',list_demandes_patient, name='list_demandes_patient'),
 ]

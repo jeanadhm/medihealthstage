@@ -111,15 +111,13 @@ export default function PatientSidebar() {
                   <i className="fas fa-hospital mr-2 text-sm"></i> Hopitaux
                 </Link>
               </li>
-
-              {/* Appointments */}
+{/* Appointments */}
               <li className="items-center relative menu-item">
                 <a
                   className="text-xs uppercase py-3 font-bold block cursor-pointer"
                   onClick={() => toggleSubMenu("appointments")}
                 >
-                  <i className="fas fa-calendar-alt mr-2 text-sm"></i>
-                  Rendez-vous
+                  <i className="fas fa-calendar-alt mr-2 text-sm"></i> Rendez-vous
                 </a>
                 {openSubMenu === "appointments" && (
                   <motion.ul
@@ -131,10 +129,17 @@ export default function PatientSidebar() {
                     <li>
                       <Link
                         className="sub-menu-item text-xs uppercase py-2 block"
-                        to="/patient/rdv"
+                        to="/patient/myrdvs"
                       >
-                        <i className="fas fa-eye mr-2 text-sm"></i> Voir les
-                        rendez-vous
+                        <i className="fas fa-eye mr-2 text-sm"></i> Voir les rendez-vous
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        className="sub-menu-item text-xs uppercase py-2 block"
+                        to="/patient/rdv/"
+                      >
+                        <i className="fas fa-plus mr-2 text-sm"></i> Ajouter rendez-vous
                       </Link>
                     </li>
                   </motion.ul>
