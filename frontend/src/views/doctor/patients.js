@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Navbar from "components/Navbars/AuthNavbar.js";
-import Footer from "components/Footers/Footer.js";
 
 const PatientsList = () => {
   const [patients, setPatients] = useState([]);
@@ -17,30 +15,38 @@ const PatientsList = () => {
     email: '',
     numeroTelephone: '',
     password: 'nopassword',
+    created_by: localStorage.getItem('doctorId') || '', // Initialisation avec l'ID du docteur
   });
 
+  // Fonction pour récupérer la liste des patients créés par le docteur connecté
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/patients/');
-        setPatients(response.data);
+        const doctorId = localStorage.getItem('doctorId');
+        if (doctorId) {
+          const response = await axios.get(`http://127.0.0.1:8000/api/patients/?doctorId=${doctorId}`);
+          setPatients(response.data);
+        } else {
+          setError("Doctor ID is missing.");
+        }
       } catch (err) {
         setError(err);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchPatients();
   }, []);
-
+  
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  const filteredPatients = patients.filter(patient =>
+  // Filtrage des patients par nom ou prénom
+  const filteredPatients = patients.filter((patient) =>
     patient.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.prenom.toLowerCase().includes(searchTerm.toLowerCase())
+    patient.prenoms.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleInputChange = (e) => {
@@ -50,23 +56,22 @@ const PatientsList = () => {
 
   const handleCreatePatient = async (e) => {
     e.preventDefault();
-  
-    // Vérification des données avant l'envoi
-    if (!newPatient.nom || !newPatient.prenoms || !newPatient.email || !newPatient.numeroTelephone || !newPatient.password) {
-      alert("Veuillez remplir tous les champs obligatoires.");
-      return;
-    }
-  
-    // Assignation du rôle par défaut si nécessaire
-    if (!newPatient.role) {
-      newPatient.role = 'patient';  // Assurez-vous que role est correctement défini avant l'envoi
-    }
-  
+
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/users/patients/', newPatient);
-      console.log(response.data);  // Vérification de la réponse pour voir si le rôle est bien transmis
+      const doctorId = localStorage.getItem('doctorId');
+      const patientData = {
+        ...newPatient,
+        created_by: parseInt(doctorId, 10),
+        role: 'patient',  // Assurez-vous de ne pas envoyer un tableau ici
+      };
+
+      const response = await axios.post('http://127.0.0.1:8000/api/users/patients/', patientData);
+      console.log('Patient créé avec succès:', response.data);
+
       setPatients([...patients, response.data]);
       setShowCreateForm(false);
+
+      // Réinitialiser le formulaire après l'envoi réussi
       setNewPatient({
         nom: '',
         prenoms: '',
@@ -74,20 +79,14 @@ const PatientsList = () => {
         adresse: '',
         email: '',
         numeroTelephone: '',
-        role: 'patient', 
         password: 'nopassword',
       });
     } catch (err) {
-      console.error('Erreur lors de la création du patient', err);
-      if (err.response) {
-        alert(`Erreur : ${err.response.data.detail || err.response.data.message}`);
-      }
+      console.error('Erreur lors de la création du patient:', err.response?.data || err.message);
+      alert(`Erreur : ${err.response?.data.detail || 'Vérifiez les données envoyées.'}`);
     }
   };
-  
-  
 
-  
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -169,7 +168,6 @@ const PatientsList = () => {
                           onChange={handleInputChange}
                           className="mb-2 px-4 py-2 border rounded w-full"
                         />
-                        
                         <button
                           type="submit"
                           className="bg-green-500 text-white active:bg-green-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
@@ -188,7 +186,6 @@ const PatientsList = () => {
                             <th className="px-4 py-2">Adresse</th>
                             <th className="px-4 py-2">Email</th>
                             <th className="px-4 py-2">Numéro de Téléphone</th>
-                            <th className="px-4 py-2">Actions</th>
                           </tr>
                         </thead>
                         <tbody>

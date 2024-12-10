@@ -21,24 +21,26 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!formData.email || !formData.password) {
       setNotification({ type: 'error', message: 'Tous les champs sont obligatoires' });
       return;
     }
-
+  
     setLoading(true); // Active l'état de chargement
-
+  
     try {
       const response = await axios.post('http://127.0.0.1:8000/api/login/', formData);
-      const { refresh, access, message, role } = response.data;
-
+      const { refresh, access, message, role, userId } = response.data;  // Inclure l'ID du docteur dans la réponse
+  
+      // Stockage des informations de connexion dans localStorage
       localStorage.setItem('accessToken', access);
       localStorage.setItem('refreshToken', refresh);
       localStorage.setItem('userRole', role);
-
+      localStorage.setItem('doctorId', userId);  // Enregistrez l'ID du docteur ici
+  
       setNotification({ type: 'success', message });
-
+  
       setTimeout(() => {
         if (role === 'patient') {
           navigate('/patient');
@@ -57,6 +59,7 @@ const Login = () => {
       setLoading(false); // Désactive l'état de chargement
     }
   };
+  
 
   return (
     <>

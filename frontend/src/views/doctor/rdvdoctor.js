@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Box,
   TextField,
@@ -11,21 +12,31 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 
-function AppointmentForm() {
+const AppointmentForm = () => {
   const [patients, setPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [instructions, setInstructions] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/patients/");
-        const data = await response.json();
-        setPatients(data);
-      } catch (error) {
-        console.error("Erreur lors du chargement des patients:", error);
+        const doctorId = localStorage.getItem("doctorId");
+        if (doctorId) {
+          const response = await axios.get(
+            `http://127.0.0.1:8000/api/patients/?doctorId=${doctorId}`
+          );
+          setPatients(response.data);
+        } else {
+          setError("Doctor ID is missing.");
+        }
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -46,57 +57,48 @@ function AppointmentForm() {
           .padStart(2, "0")}`
       : null;
 
-    // Conserver l'heure au format HH:MM:SS
     const formattedTime = selectedTime
       ? selectedTime.toISOString().split("T")[1].split(".")[0]
       : null;
 
     const appointmentData = {
-      patient: selectedPatient, // Assurez-vous que cela contient uniquement l'ID du patient
+      patient: selectedPatient,
       date: formattedDate,
       time: formattedTime,
       instructions: instructions,
+      created_by: localStorage.getItem("doctorId"),
     };
 
-    console.log("Données du rendez-vous à envoyer:", appointmentData);
-
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/rdvs/create/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(appointmentData),
-      });
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/rdvs/create/",
+        appointmentData
+      );
 
-      const responseData = await response.json();
-      console.log("Réponse de l'API:", responseData);
-      if (response.ok) {
-        console.log("Rendez-vous enregistré avec succès");
-        // Vider les champs
+      if (response.status === 201) {
+        console.log("Rendez-vous créé avec succès");
         setSelectedPatient("");
         setSelectedDate(null);
         setSelectedTime(null);
         setInstructions("");
       } else {
-        console.error(
-          "Erreur lors de l'enregistrement du rendez-vous:",
-          responseData
-        );
+        console.error("Erreur lors de l'enregistrement du rendez-vous:", response);
       }
     } catch (error) {
-      console.error(
-        "Erreur réseau lors de l'enregistrement du rendez-vous:",
-        error
-      );
+      console.error("Erreur réseau lors de l'enregistrement du rendez-vous:", error);
     }
   };
 
+  if (loading) {
+    return <div>Loading patients...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <br />
-      <br />
-
       <Paper
         elevation={3}
         sx={{
@@ -126,32 +128,26 @@ function AppointmentForm() {
           margin="normal"
           variant="outlined"
           sx={{
-            backgroundColor: "#FFF", // bluegray-600 (fond sombre des champs)
-            color: "#e2e8f0", // texte clair
-            borderColor: "#94a3b8", // bluegray-400 (bordure claire)
+            backgroundColor: "#FFF",
+            color: "#e2e8f0",
+            borderColor: "#94a3b8",
             "& .MuiOutlinedInput-root": {
               "& fieldset": {
-                borderColor: "#94a3b8", // bluegray-400
+                borderColor: "#94a3b8",
               },
               "&:hover fieldset": {
-                borderColor: "#64748b", // bluegray-500 (bordure au survol)
+                borderColor: "#64748b",
               },
             },
           }}
         >
           {patients.map((patient) => (
-            <MenuItem
-              key={patient.id}
-              value={patient.id} // L'ID est maintenant la valeur de chaque option
-            >
-              {patient.prenom} {patient.nom}{" "}
-              {/* Affiche le nom complet dans la sélection */}
+            <MenuItem key={patient.id} value={patient.id}>
+              {patient.prenom} {patient.nom}
             </MenuItem>
           ))}
         </TextField>
 
-        <br />
-        <br />
         <DatePicker
           label="Sélectionner une date"
           value={selectedDate}
@@ -162,15 +158,15 @@ function AppointmentForm() {
               margin="normal"
               variant="outlined"
               sx={{
-                backgroundColor: "#FFF", // bluegray-600
-                color: "#FFF", // texte clair
-                borderColor: "#94a3b8", // bordure claire
+                backgroundColor: "#FFF",
+                color: "#FFF",
+                borderColor: "#94a3b8",
                 "& .MuiOutlinedInput-root": {
                   "& fieldset": {
-                    borderColor: "#94a3b8", // bordure claire
+                    borderColor: "#94a3b8",
                   },
                   "&:hover fieldset": {
-                    borderColor: "#64748b", // bluegray-500
+                    borderColor: "#64748b",
                   },
                 },
               }}
@@ -178,8 +174,6 @@ function AppointmentForm() {
             />
           )}
         />
-        <br />
-        <br />
 
         <TimePicker
           label="Sélectionner une heure"
@@ -191,15 +185,15 @@ function AppointmentForm() {
               margin="normal"
               variant="outlined"
               sx={{
-                backgroundColor: "#FFF", // bluegray-600
-                color: "#FFF", // texte clair
-                borderColor: "#94a3b8", // bordure claire
+                backgroundColor: "#FFF",
+                color: "#FFF",
+                borderColor: "#94a3b8",
                 "& .MuiOutlinedInput-root": {
                   "& fieldset": {
-                    borderColor: "#94a3b8", // bordure claire
+                    borderColor: "#94a3b8",
                   },
                   "&:hover fieldset": {
-                    borderColor: "#64748b", // bluegray-500
+                    borderColor: "#64748b",
                   },
                 },
               }}
@@ -207,7 +201,6 @@ function AppointmentForm() {
             />
           )}
         />
-        <br />
 
         <TextField
           fullWidth
@@ -219,15 +212,15 @@ function AppointmentForm() {
           margin="normal"
           variant="outlined"
           sx={{
-            backgroundColor: "#FFF", // bluegray-600
-            color: "#e2e8f0", // texte clair
-            borderColor: "#94a3b8", // bordure claire
+            backgroundColor: "#FFF",
+            color: "#e2e8f0",
+            borderColor: "#94a3b8",
             "& .MuiOutlinedInput-root": {
               "& fieldset": {
-                borderColor: "#94a3b8", // bordure claire
+                borderColor: "#94a3b8",
               },
               "&:hover fieldset": {
-                borderColor: "#64748b", // bluegray-500
+                borderColor: "#64748b",
               },
             },
           }}
@@ -240,9 +233,9 @@ function AppointmentForm() {
           onClick={handleSubmit}
           sx={{
             mt: 3,
-            backgroundColor: "#64748b", // bluegray-500
+            backgroundColor: "#64748b",
             "&:hover": {
-              backgroundColor: "#94a3b8", // bluegray-400 au survol
+              backgroundColor: "#94a3b8",
             },
           }}
         >
@@ -251,6 +244,6 @@ function AppointmentForm() {
       </Paper>
     </LocalizationProvider>
   );
-}
+};
 
 export default AppointmentForm;

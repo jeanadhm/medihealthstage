@@ -24,16 +24,29 @@ const AnalysisForm = () => {
 
   const [patients, setPatients] = useState([]);
   const [successMessage, setSuccessMessage] = useState('');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/api/patients/')
-      .then(response => {
-        setPatients(response.data);
-      })
-      .catch(error => {
-        console.error('Erreur lors de la récupération des patients !', error);
-      });
+    const fetchPatients = async () => {
+      try {
+        const doctorId = localStorage.getItem('doctorId');
+        if (doctorId) {
+          const response = await axios.get(`http://127.0.0.1:8000/api/patients/?doctorId=${doctorId}`);
+          setPatients(response.data);
+        } else {
+          setError("Doctor ID is missing.");
+        }
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchPatients();
   }, []);
+
 
   const handleChange = (e) => {
     setFormData({

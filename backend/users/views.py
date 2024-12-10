@@ -112,12 +112,15 @@ class ConexionUserView(APIView):
 
         return JsonResponse({"message": "Invalid credentials or account not active."}, status=status.HTTP_401_UNAUTHORIZED)
 
-
 class UserProfileAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # Vérification que l'utilisateur est authentifié
 
     def get(self, request):
         user = request.user
+
+        # Vérification que l'utilisateur est authentifié
+        if not user.is_authenticated:
+            return Response({"detail": "User is not authenticated."}, status=status.HTTP_401_UNAUTHORIZED)
 
         # Structure de la réponse en fonction du rôle
         data = {
@@ -127,14 +130,16 @@ class UserProfileAPIView(APIView):
             "full_name": user.full_name,
         }
 
-        if user.role == "patient":
+        # Vérifier les informations spécifiques au patient
+        if user.role == "patient" and hasattr(user, 'patient'):
             data.update({
                 "numeroTelephone": user.patient.numeroTelephone,
-                "adresse": user.adresse,
-                "dateNaissance": user.dateNaissance,
+                "adresse": user.patient.adresse,
+                "dateNaissance": user.patient.dateNaissance,
             })
 
-        elif user.role == "doctor":
+        # Vérifier les informations spécifiques au médecin
+        elif user.role == "doctor" and hasattr(user, 'doctor'):
             data.update({
                 "numIdentification": user.doctor.numIdentification,
                 "hopital": user.doctor.hopital,
@@ -142,7 +147,11 @@ class UserProfileAPIView(APIView):
                 "adresseHopital": user.doctor.adresse,
             })
 
+        else:
+            return Response({"detail": "Profile non trouvé."}, status=status.HTTP_404_NOT_FOUND)
+
         return Response(data, status=status.HTTP_200_OK)
+
 
 @api_view(['GET'])
 def protected_view(request):

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Box, Typography, Grid, CircularProgress, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Collapse, Button } from '@mui/material';
+import { Box, Typography, Grid, CircularProgress, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Collapse } from '@mui/material';
 
 function AllAnalyses() {
   const [analyses, setAnalyses] = useState(null);
@@ -10,10 +10,14 @@ function AllAnalyses() {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedRow, setExpandedRow] = useState(null); // To track which row is expanded
 
+  // L'ID du médecin - ici je prends un exemple statique, il faut l'obtenir dynamiquement
+  const doctorId = '13'; // Exemple statique, remplace-le par la méthode d'obtention dynamique de l'ID du médecin
+  
   useEffect(() => {
     const fetchAnalyses = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/analyses/all/');
+        // Appel API avec l'ID du médecin dans la query string
+        const response = await axios.get(`http://127.0.0.1:8000/analyses/all/?doctorId=${doctorId}`);
         setAnalyses(response.data);
         setFilteredAnalyses(response.data); // Initialisation de filteredAnalyses
         setLoading(false);
@@ -24,7 +28,7 @@ function AllAnalyses() {
     };
 
     fetchAnalyses();
-  }, []);
+  }, [doctorId]);
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -73,7 +77,7 @@ function AllAnalyses() {
   }
 
   return (
-    <Box sx={{ padding: 2 , mt: 10}}>
+    <Box sx={{ padding: 2 , mt: 10 }}>
       <Typography variant="h4" gutterBottom>
         Analyses Médicales
       </Typography>
@@ -230,9 +234,9 @@ function AllAnalyses() {
                           <Collapse in={expandedRow === analysis.id} timeout="auto" unmountOnExit>
                             <Box sx={{ padding: 2 }}>
                               <Typography variant="h6">Détails de l'Analyse IST</Typography>
-                              <Typography>HIV Test: {analysis.hiv_test}</Typography>
-                              <Typography>Syphilis Test: {analysis.syphilis_test}</Typography>
-                              <Typography>Chlamydia Test: {analysis.chlamydia_test}</Typography>
+                              <Typography>HIV: {analysis.hiv}</Typography>
+                              <Typography>Hepatitis B: {analysis.hep_b}</Typography>
+                              <Typography>Syphilis: {analysis.syphilis}</Typography>
                             </Box>
                           </Collapse>
                         </TableCell>
@@ -280,8 +284,8 @@ function AllAnalyses() {
                           <Collapse in={expandedRow === analysis.id} timeout="auto" unmountOnExit>
                             <Box sx={{ padding: 2 }}>
                               <Typography variant="h6">Détails de l'Analyse Diabète</Typography>
-                              <Typography>Glycémie: {analysis.glycemia}</Typography>
-                              <Typography>Insulin: {analysis.insulin}</Typography>
+                              <Typography>Fasting Blood Sugar: {analysis.fasting_blood_sugar}</Typography>
+                              <Typography>HbA1c: {analysis.hba1c}</Typography>
                             </Box>
                           </Collapse>
                         </TableCell>
@@ -295,6 +299,7 @@ function AllAnalyses() {
             <Typography>Aucune analyse diabète trouvée.</Typography>
           )}
         </Grid>
+
       </Grid>
     </Box>
   );

@@ -13,6 +13,8 @@ import Chat from "views/doctor/consultations";
 import Allanalyses from "views/doctor/allanalyses";
 import ConsultationForm from "views/doctor/consults";
 import UserProfileDoc from "views/doctor/profiledoc";
+import MedicalRecord from "views/doctor/dossier";
+import Settings from "views/doctor/settings";
 
 
 export default function Doctor() {
@@ -31,6 +33,8 @@ export default function Doctor() {
             <Route path="analyses/all" element={<Allanalyses />} />
             <Route path="consults" element={<ConsultationForm />} />
             <Route path="profiledoc" element={<UserProfileDoc />} />
+            <Route path="dossier" element={<MedicalRecord />} />
+            <Route path="settings" element={<Settings />} />
             
             
             {/* Redirection pour les chemins invalides */}

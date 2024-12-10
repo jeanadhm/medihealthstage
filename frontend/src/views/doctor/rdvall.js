@@ -8,9 +8,16 @@ function AppointmentList() {
     fetchAppointments();
   }, []);
 
+  // Fonction pour récupérer les rendez-vous du docteur connecté
   const fetchAppointments = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/rdvs/');
+      const doctorId = localStorage.getItem('doctorId'); // Récupérer l'ID du docteur depuis le localStorage
+      if (!doctorId) {
+        console.error('Doctor ID is missing.');
+        return;
+      }
+
+      const response = await fetch(`http://127.0.0.1:8000/api/rdvs/?doctorId=${doctorId}`);
       const data = await response.json();
       setAppointments(data);
     } catch (error) {
@@ -30,7 +37,7 @@ function AppointmentList() {
 
       if (response.ok) {
         console.log('Statut mis à jour avec succès');
-        fetchAppointments();
+        fetchAppointments(); // Recharger les rendez-vous après mise à jour
       } else {
         console.error('Erreur lors de la mise à jour du statut');
       }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from 'axios';
 import {
   Box,
   TextField,
@@ -12,10 +13,11 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers";
 
-const ConsultationForm = () => {
+const ConsultationForm = ({ doctorId }) => { // Passez l'ID du médecin comme prop ou récupérez-le d'une autre manière
   const [patients, setPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState("");
   const [consultationDate, setConsultationDate] = useState(null);
+  const [error, setError] = useState(null);
   const [symptoms, setSymptoms] = useState("");
   const [constants, setConstants] = useState({
     temperature: "",
@@ -24,18 +26,23 @@ const ConsultationForm = () => {
   });
   const [loading, setLoading] = useState(false);
 
-  // Charger les patients depuis l'API
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/patients/");
-        const data = await response.json();
-        setPatients(data);
-      } catch (error) {
-        console.error("Erreur lors du chargement des patients :", error);
+        const doctorId = localStorage.getItem('doctorId');
+        if (doctorId) {
+          const response = await axios.get(`http://127.0.0.1:8000/api/patients/?doctorId=${doctorId}`);
+          setPatients(response.data);
+        } else {
+          setError("Doctor ID is missing.");
+        }
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
       }
     };
-
+  
     fetchPatients();
   }, []);
 
@@ -57,15 +64,15 @@ const ConsultationForm = () => {
       ? consultationDate.toISOString().split("T")[0]
       : null;
 
-      const consultationData = {
-        patient: selectedPatient, 
-        date: formattedDate,
-        symptoms,
-        temperature: constants.temperature,
-        blood_pressure: constants.bloodPressure,
-        pulse: constants.pulse,
-      };
-      
+    const consultationData = {
+      patient: selectedPatient,
+      date: formattedDate,
+      symptoms,
+      temperature: constants.temperature,
+      blood_pressure: constants.bloodPressure,
+      pulse: constants.pulse,
+    };
+
     try {
       const response = await fetch("http://127.0.0.1:8000/api/consultations/", {
         method: "POST",

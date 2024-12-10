@@ -12,8 +12,9 @@ class CommonAnalysis(models.Model):
     created_by = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='common_analyses', null=True, blank=True)  # Ajout du champ created_by
 
     def __str__(self):
-        return f"Common Analysis for {self.patient.nom}{self.patient.prenoms} on {self.date or 'N/A'}"
-
+        if self.patient:
+            return f"Common Analysis for {self.patient.nom} {self.patient.prenoms} on {self.date or 'N/A'}"
+        return f"Common Analysis on {self.date or 'N/A'} (No Patient)"
 
 class CholesterolAnalysis(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=True, blank=True)
@@ -73,8 +74,8 @@ class DossierMedical(models.Model):
 
     created_by = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='dossiers_created', null=True, blank=True)
 
-    def __str__(self):
-        return f"Dossier Médical de {self.patient.nom} {self.patient.prenoms}"
+
+
 
     def add_common_analysis(self, analysis):
         self.common_analyses.add(analysis)

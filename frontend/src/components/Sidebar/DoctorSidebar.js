@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import "./style.css";
 
@@ -7,6 +7,7 @@ export default function DoctorSidebar() {
   const [collapseShow, setCollapseShow] = useState("hidden");
   const [openSubMenu, setOpenSubMenu] = useState("");
   const [theme, setTheme] = useState("light");
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.documentElement.className = theme;
@@ -18,6 +19,14 @@ export default function DoctorSidebar() {
 
   const changeTheme = (newTheme) => {
     setTheme(newTheme);
+  };
+
+  const handleLogout = () => {
+    // Supprimer les jetons et les données de l'utilisateur du localStorage
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userData");
+    navigate("/login");
   };
 
   return (
@@ -47,7 +56,7 @@ export default function DoctorSidebar() {
             onClick={() => changeTheme(theme === "dark" ? "light" : "dark")}
             className="mb-4 text-xs uppercase py-2 px-3 font-bold rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600"
           >
-            {theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            {theme === "dark" ? "Mode Clair" : "Mode Sombre"}
           </button>
 
           {/* Sidebar content */}
@@ -65,14 +74,6 @@ export default function DoctorSidebar() {
                   className="text-xs uppercase py-3 font-bold block"
                 >
                   <i className="fas fa-user-cog mr-2 text-sm"></i> Profile
-                </Link>
-              </li>
-              <li className="items-center">
-                <Link
-                  to="/doctor/settings/account"
-                  className="text-xs uppercase py-3 font-bold block"
-                >
-                  <i className="fas fa-cog mr-2 text-sm"></i> Settings
                 </Link>
               </li>
             </ul>
@@ -172,7 +173,7 @@ export default function DoctorSidebar() {
                         className="sub-menu-item text-xs uppercase py-2 block"
                         to="/doctor/analyses"
                       >
-                        <i className="fas fa-plus mr-2 text-sm"></i> Ajouter prescription
+                        <i className="fas fa-plus mr-2 text-sm"></i> Ajouter analyse
                       </Link>
                     </li>
                   </motion.ul>
@@ -213,7 +214,40 @@ export default function DoctorSidebar() {
                   </motion.ul>
                 )}
               </li>
+              {/* Dossier Médical */}
+<li className="items-center relative menu-item">
+  <a
+    className="text-xs uppercase py-3 font-bold block cursor-pointer"
+    onClick={() => toggleSubMenu("dossierMedical")}
+  >
+    <i className="fas fa-book mr-2 text-sm"></i> Dossier Médical
+  </a>
+  {openSubMenu === "dossierMedical" && (
+    <motion.ul
+      className="ml-4"
+      initial={{ maxHeight: 0 }}
+      animate={{ maxHeight: 100 }}
+      transition={{ duration: 0.3 }}
+    >
+      <li>
+        <Link
+          className="sub-menu-item text-xs uppercase py-2 block"
+          to="/doctor/dossier"  // Redirection vers la page du dossier médical
+        >
+          <i className="fas fa-eye mr-2 text-sm"></i> Voir le Dossier Médical
+        </Link>
+      </li>
+    </motion.ul>
+  )}
+</li>
+
             </ul>
+            <button
+              onClick={handleLogout}
+              className="text-xs uppercase py-3 font-bold block mt-4 text-red-600"
+            >
+              <i className="fas fa-sign-out-alt mr-2 text-sm"></i> Déconnexion
+            </button>
           </div>
         </div>
       </nav>

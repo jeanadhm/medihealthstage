@@ -9,7 +9,8 @@ from .views import (
     DiabetesAnalysisListCreateView,
     DiabetesAnalysisDetailView,
     AllAnalysesListView,
-    CreateOrUpdateDossierMedicalView
+    CreateOrUpdateDossierMedicalView,
+    list_medical_records
 )
 
 urlpatterns = [
@@ -31,4 +32,5 @@ urlpatterns = [
 
     path('all/', AllAnalysesListView.as_view(), name='all_analyses_list'),
     path('dossiermedical/', CreateOrUpdateDossierMedicalView.as_view(), name='create_or_update_dossier_medical'),
+    path('dossiermedical/list/', list_medical_records, name='list_medical_records'),
 ]

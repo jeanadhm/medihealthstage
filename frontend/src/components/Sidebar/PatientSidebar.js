@@ -67,7 +67,7 @@ export default function PatientSidebar() {
             onClick={() => changeTheme(theme === "dark" ? "light" : "dark")}
             className="mb-4 text-xs uppercase py-2 px-3 font-bold rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600"
           >
-            {theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            {theme === "dark" ? "Mode Clair" : "Mode Sombre"}
           </button>
 
           {/* Sidebar content */}
@@ -95,14 +95,7 @@ export default function PatientSidebar() {
                   <i className="fas fa-user-cog mr-2 text-sm"></i> Profile
                 </Link>
               </li>
-              <li className="items-center">
-                <Link
-                  to="/patient/settings/account"
-                  className="text-xs uppercase py-3 font-bold block"
-                >
-                  <i className="fas fa-cog mr-2 text-sm"></i> Settings
-                </Link>
-              </li>
+              
             </ul>
 
             <hr className="my-4 md:min-w-full" />

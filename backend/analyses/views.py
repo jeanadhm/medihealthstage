@@ -11,6 +11,7 @@ from django.conf import settings
 from .models import CommonAnalysis, CholesterolAnalysis, IstAnalysis, DiabetesAnalysis, DossierMedical
 from .serializers import CommonAnalysisSerializer, CholesterolAnalysisSerializer, IstAnalysisSerializer, DiabetesAnalysisSerializer, DossierMedicalSerializer
 from users.models import Patient, Doctor, Rdv, Consultation
+from rest_framework.decorators import api_view
 # Vues pour les analyses courantes
 class CommonAnalysisListCreateView(generics.ListCreateAPIView):
     queryset = CommonAnalysis.objects.all()
@@ -222,3 +223,18 @@ class CreateOrUpdateDossierMedicalView(APIView):
         # Retourner le dossier médical
         serializer = DossierMedicalSerializer(dossier)
         return Response(serializer.data, status=200)
+
+@api_view(['GET'])
+def list_medical_records(request):
+    doctor_id = request.query_params.get('doctorId')  # Récupérer l'ID du docteur depuis les paramètres de la requête
+    
+    if doctor_id:
+        try:
+            # Filtrer les dossiers médicaux par le docteur
+            medical_records = DossierMedical.objects.filter(doctor_id=doctor_id).order_by('patient__nom', 'patient__prenoms')
+            serializer = DossierMedicalSerializer(medical_records, many=True)
+            return Response(serializer.data)
+        except DossierMedical.DoesNotExist:
+            return Response({"detail": "Aucun dossier médical trouvé pour ce docteur."}, status=404)
+    else:
+        return Response({"detail": "L'ID du docteur est requis"}, status=400)
