@@ -165,7 +165,7 @@ export default function Landing() {
                 <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded-lg bg-lightBlue-500">
                   <img
                     alt="..."
-                    src={require("../assets/img/img2.jpg")}
+                    src={require("../assets/img/hopi6.jpg")}
                     className="w-full align-middle rounded-t-lg"
                     data-aos="zoom-in"
                   />

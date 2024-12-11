@@ -2,9 +2,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-export default function Navbar(props) {
+export default function Navbar() {
   const [navbarOpen, setNavbarOpen] = useState(false);
-  const [submenuOpen, setSubmenuOpen] = useState(false); // État pour le sous-menu
 
   return (
     <>
@@ -18,7 +17,7 @@ export default function Navbar(props) {
             MediHealth
           </Link>
 
-          {/* Bouton mobile */}
+         
           <button
             className="text-blueGray-800 text-xl leading-none px-3 py-1 border border-solid border-transparent rounded bg-transparent block lg:hidden outline-none focus:outline-none"
             type="button"
@@ -31,10 +30,9 @@ export default function Navbar(props) {
           <div
             className={`lg:flex flex-grow items-center ${
               navbarOpen ? "block" : "hidden"
-            }`}
+            } lg:block`}
           >
             <ul className="flex flex-col lg:flex-row list-none lg:ml-auto">
-              {/* Lien Accueil */}
               <li className="flex items-center">
                 <Link
                   className="text-blueGray-800 px-3 py-4 lg:py-2 flex items-center text-sm uppercase font-bold hover:text-blueGray-600"
@@ -43,7 +41,6 @@ export default function Navbar(props) {
                   Accueil
                 </Link>
               </li>
-
               <li className="flex items-center">
                 <Link
                   className="text-blueGray-800 px-3 py-4 lg:py-2 flex items-center text-sm uppercase font-bold hover:text-blueGray-600"
@@ -52,8 +49,6 @@ export default function Navbar(props) {
                   Connexion
                 </Link>
               </li>
-
-              {/* Lien Contactez-nous */}
               <li className="flex items-center">
                 <Link
                   className="text-blueGray-800 px-3 py-4 lg:py-2 flex items-center text-sm uppercase font-bold hover:text-blueGray-600"
@@ -62,12 +57,10 @@ export default function Navbar(props) {
                   Contactez-nous
                 </Link>
               </li>
-
-              {/* Lien À propos */}
               <li className="flex items-center">
                 <Link
                   className="text-blueGray-800 px-3 py-4 lg:py-2 flex items-center text-sm uppercase font-bold hover:text-blueGray-600"
-                  to="/About"
+                  to="/about"
                 >
                   À propos & CGU
                 </Link>

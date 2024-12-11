@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Paper, CircularProgress, List, ListItem, ListItemText, Button, Snackbar, Alert } from '@mui/material';
+import { Box, Typography, Paper, Table, TableHead, TableRow, TableCell, TableBody, Button, CircularProgress, Snackbar, Alert } from '@mui/material';
 
 function DoctorRequests() {
   const [requests, setRequests] = useState([]);
@@ -77,18 +77,30 @@ function DoctorRequests() {
     fetchRequests();
   }, []);
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'pending':
+        return '#607D8B'; // bluegray-500
+      case 'attended':
+        return '#37474F'; // bluegray-800
+      case 'missed':
+        return '#FF5252'; // Une couleur rouge pour contraster
+      default:
+        return '#B0BEC5'; // Gris clair pour les statuts inconnus
+    }
+  };
+
   return (
-    <Box sx={{ maxWidth: 800, margin: 'auto', padding: 4, mt: 10 }}>
+    <Box sx={{ maxWidth: 1000, margin: 'auto', padding: 4, mt: 10 }}>
       <Paper
         elevation={3}
         sx={{
           padding: 3,
-          backgroundColor: '#1e293b', // bluegray-800
-          color: '#cbd5e1', // bluegray-500
+          backgroundColor: '#ECEFF1', // Fond clair
         }}
       >
-        <Typography variant="h5" align="center" sx={{ marginBottom: 2, color: '#cbd5e1' }}>
-          Demandes des Patients
+        <Typography variant="h4" align="center" sx={{ marginBottom: 2, color: '#37474F' }}>
+          Liste des demandes des patients
         </Typography>
 
         {loading && (
@@ -110,60 +122,66 @@ function DoctorRequests() {
         )}
 
         {!loading && !error && requests.length > 0 && (
-          <List>
-            {requests.map((request) => (
-              <ListItem
-                key={request.id}
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  borderBottom: '1px solid #64748b', // Ligne de séparation bluegray-500
-                  '&:last-child': { borderBottom: 'none' },
-                  marginBottom: 2,
-                }}
-              >
-                <ListItemText
-                  primary={`Patient : ${request.patient_name}`}
-                  secondary={
-                    <>
-                      <Typography component="span" variant="body2" sx={{ display: 'block', color: '#94a3b8' }}>
-                        Date : {request.date}
-                      </Typography>
-                      <Typography component="span" variant="body2" sx={{ display: 'block', color: '#94a3b8' }}>
-                        Heure : {request.time}
-                      </Typography>
-                      <Typography component="span" variant="body2" sx={{ display: 'block', color: '#94a3b8' }}>
-                        Statut : {request.status}
-                      </Typography>
-                      {request.instructions && (
-                        <Typography component="span" variant="body2" sx={{ display: 'block', color: '#cbd5e1' }}>
-                          Instructions : {request.instructions}
-                        </Typography>
-                      )}
-                    </>
-                  }
-                />
-
-                <Box sx={{ display: 'flex', gap: 2, marginLeft: 'auto' }}>
-                  <Button
-                    variant="contained"
-                    color="success"
-                    onClick={() => handleStatusChange(request.id, 'Validé')}
-                  >
-                    Valider
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="warning"
-                    onClick={() => handleStatusChange(request.id, 'Reporté')}
-                  >
-                    Reporter
-                  </Button>
-                </Box>
-              </ListItem>
-            ))}
-          </List>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell><strong>Patient</strong></TableCell>
+                <TableCell><strong>Date</strong></TableCell>
+                <TableCell><strong>Heure</strong></TableCell>
+                <TableCell><strong>Statut</strong></TableCell>
+                <TableCell><strong>Actions</strong></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {requests.map((request) => (
+                <TableRow key={request.id}>
+                  <TableCell>{request.patient_name}</TableCell>
+                  <TableCell>{request.date}</TableCell>
+                  <TableCell>{request.time}</TableCell>
+                  <TableCell>
+                    <Box
+                      component="span"
+                      sx={{
+                        color: getStatusColor(request.status),
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      {request.status === 'En attente' && 'En attente'}
+                      {request.status === 'Validé' && 'Validé'}
+                      {request.status === 'Reporté' && 'Reporté'}
+                      
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Button
+                        variant="contained"
+                        sx={{
+                          backgroundColor: '#37474F',
+                          color: '#FFFFFF',
+                          '&:hover': { backgroundColor: '#263238' },
+                        }}
+                        onClick={() => handleStatusChange(request.id, 'Validé')}
+                      >
+                        Valider
+                      </Button>
+                      <Button
+                        variant="contained"
+                        sx={{
+                          backgroundColor: '#607D8B',
+                          color: '#FFFFFF',
+                          '&:hover': { backgroundColor: '#455A64' },
+                        }}
+                        onClick={() => handleStatusChange(request.id, 'Reporté')}
+                      >
+                        Reporter
+                      </Button>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </Paper>
 

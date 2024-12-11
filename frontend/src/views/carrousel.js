@@ -29,13 +29,13 @@ const Carousel = () => {
   return (
     <Slider {...settings}>
       <div>
-      <img src={require('../assets/img/doctor1.jpg')} style={imageStyle} alt="Image 1" />
+      <img src={require('../assets/img/hopi4.jpg')} style={imageStyle} alt="Image 1" />
     </div>
     <div>
-      <img src={require('../assets/img/doctor2.jpg')} style={imageStyle} alt="Image 2" />
+      <img src={require('../assets/img/hopi3.jpg')} style={imageStyle} alt="Image 2" />
     </div>
     <div>
-      <img src={require('../assets/img/doctor3.jpg')} style={imageStyle} alt="Image 3" />
+      <img src={require('../assets/img/hopi5.jpg')} style={imageStyle} alt="Image 3" />
     </div>
     </Slider>
   );
