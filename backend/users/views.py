@@ -17,6 +17,7 @@ from django.http import JsonResponse
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import NotFound
 
 
 class DoctorView(viewsets.ModelViewSet):
@@ -337,7 +338,7 @@ class DemandesAPIView(APIView):
 @api_view(['GET'])
 def list_demandes_patient(request):
     # Récupérer l'ID du patient depuis les paramètres de la requête GET
-    patient_id = request.query_params.get('patientId')  # Exemple : ?patientId=1
+    patient_id = request.query_params.get('patientId')  
 
     if patient_id:
         try:
@@ -373,3 +374,104 @@ def list_demandes_patient(request):
             return Response({"detail": "Aucune demande trouvée pour ce patient."}, status=404)
     else:
         return Response({"detail": "Patient ID is required"}, status=400)
+    
+
+@api_view(['GET'])
+def list_demandes_patient(request):
+    # Récupérer l'ID du patient depuis les paramètres de la requête GET
+    patient_id = request.query_params.get('patientId')
+
+    if patient_id:
+        try:
+            # Filtrer les demandes par l'ID du patient
+            demandes = Demandes.objects.filter(patient_id=patient_id)
+
+            # Créer une liste de demandes avec les informations du docteur et le statut
+            demandes_data = []
+            for demande in demandes:
+                doctor = demande.doctor  # Assurez-vous que le champ doctor est une ForeignKey vers le modèle Doctor
+
+                if isinstance(doctor, Doctor):  # Vérifier que doctor est un objet valide
+                    doctor_name = f"{doctor.nom} {doctor.prenoms}"
+                else:
+                    doctor_name = "Docteur inconnu"
+
+                demande_data = {
+                    'id': demande.id,
+                    'patient_id': demande.patient_id,
+                    'date': demande.date,
+                    'time': demande.time,
+                    'instructions': demande.instructions,
+                    'doctor_name': doctor_name,
+                    'status': demande.status,
+                }
+
+                demandes_data.append(demande_data)
+
+            return Response(demandes_data)
+
+        except Demandes.DoesNotExist:
+            return Response({"detail": "Aucune demande trouvée pour ce patient."}, status=404)
+    else:
+        return Response({"detail": "Patient ID is required"}, status=400)
+
+@api_view(['GET'])
+def list_demandes_doctor(request):
+    # Récupérer l'ID du docteur depuis les paramètres de la requête GET
+    doctor_id = request.query_params.get('doctorId')
+
+    if doctor_id:
+        try:
+            # Filtrer les demandes par l'ID du docteur
+            demandes = Demandes.objects.filter(doctor_id=doctor_id)
+
+            # Créer une liste de demandes avec les informations du patient et le statut
+            demandes_data = []
+            for demande in demandes:
+                patient = demande.patient  # Assurez-vous que le champ patient est une ForeignKey vers le modèle Patient
+
+                if patient:  # Vérifier que patient est un objet valide
+                    patient_name = f"{patient.nom} {patient.prenoms}"
+                else:
+                    patient_name = "Patient inconnu"
+
+                demande_data = {
+                    'id': demande.id,
+                    'doctor_id': demande.doctor_id,
+                    'date': demande.date,
+                    'time': demande.time,
+                    'instructions': demande.instructions,
+                    'patient_name': patient_name,
+                    'status': demande.status,
+                }
+
+                demandes_data.append(demande_data)
+
+            return Response(demandes_data)
+
+        except Demandes.DoesNotExist:
+            return Response({"detail": "Aucune demande trouvée pour ce docteur."}, status=404)
+    else:
+        return Response({"detail": "Doctor ID is required"}, status=400)
+    
+
+@api_view(['PATCH'])
+def update_demandes_status(request, pk):
+    try:
+        # Récupérer l'objet demande par son ID
+        demande = Demandes.objects.get(pk=pk)
+
+        # Obtenir le nouveau statut depuis le corps de la requête
+        new_status = request.data.get('status')
+        if not new_status or new_status not in ['Validé', 'Reporté']:
+            return Response({'error': 'Statut invalide.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Mettre à jour le statut
+        demande.status = new_status
+        demande.save()
+
+        return Response({'message': 'Statut mis à jour avec succès.'}, status=status.HTTP_200_OK)
+    except Demandes.DoesNotExist:
+        return Response({'error': 'Demande non trouvée.'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -2,6 +2,7 @@ from django.db import models
 from users.models import Patient, Doctor, Consultation, Rdv  # Assurez-vous d'importer le modèle Doctor
 
 class CommonAnalysis(models.Model):
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, null=True, blank=True, related_name='common_analysesdoc')
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=True, blank=True)
     red_blood_cells = models.FloatField(null=True, blank=True)
     white_blood_cells = models.FloatField(null=True, blank=True)
@@ -17,6 +18,7 @@ class CommonAnalysis(models.Model):
         return f"Common Analysis on {self.date or 'N/A'} (No Patient)"
 
 class CholesterolAnalysis(models.Model):
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE,null=True, blank=True, related_name='cholesterol_analysesdoc')
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=True, blank=True)
     chol_total = models.FloatField(null=True, blank=True)
     chol_hdl = models.FloatField(null=True, blank=True)
@@ -31,6 +33,7 @@ class CholesterolAnalysis(models.Model):
 
 
 class IstAnalysis(models.Model):
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, null=True, blank=True, related_name='ist_analysesdoc')
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=True, blank=True)
     ist_vih = models.CharField(max_length=50, null=True, blank=True)
     ist_syphilis = models.CharField(max_length=50, null=True, blank=True)
@@ -45,6 +48,7 @@ class IstAnalysis(models.Model):
 
 
 class DiabetesAnalysis(models.Model):
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE,null=True, blank=True, related_name='diabete_analyses')
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=True, blank=True)
     diabete_glucose = models.FloatField(null=True, blank=True)
     diabete_hba1c = models.FloatField(null=True, blank=True)

@@ -141,7 +141,7 @@ def save_analysis(request):
     
 class AllAnalysesListView(APIView):
     def get(self, request, *args, **kwargs):
-        # Récupérer l'ID du médecin passé dans l'URL
+        # Récupérer l'ID du médecin passé dans les paramètres de la query string
         doctor_id = request.query_params.get('doctorId')
 
         if not doctor_id:
@@ -154,10 +154,10 @@ class AllAnalysesListView(APIView):
             return Response({"error": "Doctor not found"}, status=404)
 
         # Filtrer les analyses en fonction de l'ID du médecin
-        common_analyses = CommonAnalysis.objects.filter(doctor_id=doctor.id)
-        cholesterol_analyses = CholesterolAnalysis.objects.filter(doctor_id=doctor.id)
-        ist_analyses = IstAnalysis.objects.filter(doctor_id=doctor.id)
-        diabetes_analyses = DiabetesAnalysis.objects.filter(doctor_id=doctor.id)
+        common_analyses = CommonAnalysis.objects.filter(doctor=doctor)
+        cholesterol_analyses = CholesterolAnalysis.objects.filter(doctor=doctor)
+        ist_analyses = IstAnalysis.objects.filter(doctor=doctor)
+        diabetes_analyses = DiabetesAnalysis.objects.filter(doctor=doctor)
 
         # Sérialiser les analyses filtrées
         common_serializer = CommonAnalysisSerializer(common_analyses, many=True)

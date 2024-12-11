@@ -133,6 +133,16 @@ export default function DoctorSidebar() {
                         <i className="fas fa-eye mr-2 text-sm"></i> Voir les rendez-vous
                       </Link>
                     </li>
+
+                    <li>
+                      <Link
+                        className="sub-menu-item text-xs uppercase py-2 block"
+                        to="/doctor/demandepatient/"
+                      >
+                        <i className="fas fa-eye mr-2 text-sm"></i> Voir les demande de rendez-vous
+                      </Link>
+                    </li>
+
                     <li>
                       <Link
                         className="sub-menu-item text-xs uppercase py-2 block"

@@ -15,6 +15,7 @@ import ConsultationForm from "views/doctor/consults";
 import UserProfileDoc from "views/doctor/profiledoc";
 import MedicalRecord from "views/doctor/dossier";
 import Settings from "views/doctor/settings";
+import DoctorRequests from "views/doctor/demandepatient";
 
 
 export default function Doctor() {
@@ -35,6 +36,7 @@ export default function Doctor() {
             <Route path="profiledoc" element={<UserProfileDoc />} />
             <Route path="dossier" element={<MedicalRecord />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="demandepatient" element={<DoctorRequests />} />
             
             
             {/* Redirection pour les chemins invalides */}

@@ -10,8 +10,8 @@ function AllAnalyses() {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedRow, setExpandedRow] = useState(null); // To track which row is expanded
 
-  // L'ID du médecin - ici je prends un exemple statique, il faut l'obtenir dynamiquement
-  const doctorId = '13'; // Exemple statique, remplace-le par la méthode d'obtention dynamique de l'ID du médecin
+  // L'ID du médecin - à récupérer dynamiquement selon le contexte
+  const doctorId = '13'; // Remplacez par la méthode d'obtention dynamique de l'ID du médecin
   
   useEffect(() => {
     const fetchAnalyses = async () => {
@@ -22,7 +22,7 @@ function AllAnalyses() {
         setFilteredAnalyses(response.data); // Initialisation de filteredAnalyses
         setLoading(false);
       } catch (error) {
-        setError(error);
+        setError("Erreur de chargement des données");
         setLoading(false);
       }
     };
@@ -73,7 +73,7 @@ function AllAnalyses() {
   }
 
   if (error) {
-    return <Typography color="error">Erreur de chargement des données</Typography>;
+    return <Typography color="error">{error}</Typography>;
   }
 
   return (
@@ -183,10 +183,10 @@ function AllAnalyses() {
                           <Collapse in={expandedRow === analysis.id} timeout="auto" unmountOnExit>
                             <Box sx={{ padding: 2 }}>
                               <Typography variant="h6">Détails de l'Analyse Cholestérol</Typography>
-                              <Typography>Total Cholesterol: {analysis.chol_total}</Typography>
-                              <Typography>HDL: {analysis.chol_hdl}</Typography>
-                              <Typography>LDL: {analysis.chol_ldl}</Typography>
-                              <Typography>Triglycerides: {analysis.chol_triglycerides}</Typography>
+                              <Typography>Total Cholesterol: {analysis.total_cholesterol}</Typography>
+                              <Typography>HDL Cholesterol: {analysis.hdl_cholesterol}</Typography>
+                              <Typography>LDL Cholesterol: {analysis.ldl_cholesterol}</Typography>
+                              <Typography>Triglycerides: {analysis.triglycerides}</Typography>
                             </Box>
                           </Collapse>
                         </TableCell>
@@ -235,8 +235,7 @@ function AllAnalyses() {
                             <Box sx={{ padding: 2 }}>
                               <Typography variant="h6">Détails de l'Analyse IST</Typography>
                               <Typography>HIV: {analysis.hiv}</Typography>
-                              <Typography>Hepatitis B: {analysis.hep_b}</Typography>
-                              <Typography>Syphilis: {analysis.syphilis}</Typography>
+                              <Typography>SYPHILIS: {analysis.syphilis}</Typography>
                             </Box>
                           </Collapse>
                         </TableCell>
@@ -284,7 +283,7 @@ function AllAnalyses() {
                           <Collapse in={expandedRow === analysis.id} timeout="auto" unmountOnExit>
                             <Box sx={{ padding: 2 }}>
                               <Typography variant="h6">Détails de l'Analyse Diabète</Typography>
-                              <Typography>Fasting Blood Sugar: {analysis.fasting_blood_sugar}</Typography>
+                              <Typography>Glucose: {analysis.glucose}</Typography>
                               <Typography>HbA1c: {analysis.hba1c}</Typography>
                             </Box>
                           </Collapse>
@@ -299,7 +298,6 @@ function AllAnalyses() {
             <Typography>Aucune analyse diabète trouvée.</Typography>
           )}
         </Grid>
-
       </Grid>
     </Box>
   );
