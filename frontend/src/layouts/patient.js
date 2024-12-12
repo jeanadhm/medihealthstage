@@ -33,7 +33,7 @@ export default function Patient() {
           
 
             {/* Redirection par défaut pour les chemins invalides */}
-            <Route path="*" element={<Navigate to="rdv" />} />
+            <Route path="*" element={<Navigate to="hospitals" />} />
           </Routes>
         </div>
       </div>
