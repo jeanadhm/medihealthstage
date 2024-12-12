@@ -10,14 +10,18 @@ function AllAnalyses() {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedRow, setExpandedRow] = useState(null); // To track which row is expanded
 
-  // L'ID du médecin - à récupérer dynamiquement selon le contexte
-  const doctorId = '13'; // Remplacez par la méthode d'obtention dynamique de l'ID du médecin
+  const doctorId = localStorage.getItem('doctorId'); // Récupère l'ID du médecin
+if (doctorId) {
+  console.log(`ID du médecin : ${doctorId}`);
+} else {
+  console.error("doctorId non trouvé dans le localStorage");
+}
   
   useEffect(() => {
     const fetchAnalyses = async () => {
       try {
         // Appel API avec l'ID du médecin dans la query string
-        const response = await axios.get(`http://127.0.0.1:8000/analyses/all/?doctorId=${doctorId}`);
+        const response = await axios.get(`http://127.0.0.1:8000/analyses/all/${doctorId}/`);
         setAnalyses(response.data);
         setFilteredAnalyses(response.data); // Initialisation de filteredAnalyses
         setLoading(false);

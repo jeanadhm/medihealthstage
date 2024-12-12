@@ -12,6 +12,8 @@ from .models import CommonAnalysis, CholesterolAnalysis, IstAnalysis, DiabetesAn
 from .serializers import CommonAnalysisSerializer, CholesterolAnalysisSerializer, IstAnalysisSerializer, DiabetesAnalysisSerializer, DossierMedicalSerializer
 from users.models import Patient, Doctor, Rdv, Consultation
 from rest_framework.decorators import api_view
+from rest_framework import status
+import logging
 # Vues pour les analyses courantes
 class CommonAnalysisListCreateView(generics.ListCreateAPIView):
     queryset = CommonAnalysis.objects.all()
@@ -138,46 +140,49 @@ def save_analysis(request):
     else:
         return JsonResponse({"error": "Method not allowed"}, status=405)
 
-    
+logger = logging.getLogger(__name__)
+
 class AllAnalysesListView(APIView):
     def get(self, request, *args, **kwargs):
-        # Récupérer l'ID du médecin passé dans les paramètres de la query string
-        doctor_id = request.query_params.get('doctorId')
+        doctor_id = kwargs.get('pk')
+        logger.info(f"Doctor ID: {doctor_id}")
 
         if not doctor_id:
-            return Response({"error": "Doctor ID is required"}, status=400)
+            logger.error("Doctor ID is missing")
+            return Response({"error": "Doctor ID is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Vérifier que le médecin existe avec cet ID
         try:
             doctor = Doctor.objects.get(id=doctor_id)
+            logger.info(f"Doctor found: {doctor}")
         except Doctor.DoesNotExist:
-            return Response({"error": "Doctor not found"}, status=404)
+            logger.error("Doctor not found")
+            return Response({"error": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Filtrer les analyses en fonction de l'ID du médecin
+
+        # Récupérer les analyses associées au médecin
         common_analyses = CommonAnalysis.objects.filter(doctor=doctor)
         cholesterol_analyses = CholesterolAnalysis.objects.filter(doctor=doctor)
         ist_analyses = IstAnalysis.objects.filter(doctor=doctor)
         diabetes_analyses = DiabetesAnalysis.objects.filter(doctor=doctor)
 
-        # Sérialiser les analyses filtrées
+        # Sérialiser les données
         common_serializer = CommonAnalysisSerializer(common_analyses, many=True)
         cholesterol_serializer = CholesterolAnalysisSerializer(cholesterol_analyses, many=True)
         ist_serializer = IstAnalysisSerializer(ist_analyses, many=True)
         diabetes_serializer = DiabetesAnalysisSerializer(diabetes_analyses, many=True)
 
-        # Retourner les résultats filtrés pour ce médecin
+        # Retourner la réponse
         return Response({
             "common_analyses": common_serializer.data,
             "cholesterol_analyses": cholesterol_serializer.data,
             "ist_analyses": ist_serializer.data,
             "diabetes_analyses": diabetes_serializer.data,
-        })
+        }, status=status.HTTP_200_OK)
+
     
 
 
 class CreateOrUpdateDossierMedicalView(APIView):
-    
-
     def post(self, request):
         doctor = request.user  # Docteur connecté
         patient_id = request.data.get('patient')  # ID du patient

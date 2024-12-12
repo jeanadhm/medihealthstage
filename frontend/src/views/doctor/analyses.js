@@ -19,7 +19,7 @@ const AnalysisForm = () => {
     diabete_hba1c: '',
     date: '',
     result_positive: false,
-    analysisType: '',
+    analysisType: ''
   });
 
   const [patients, setPatients] = useState([]);
@@ -27,10 +27,8 @@ const AnalysisForm = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Récupérer les patients pour le médecin courant
   useEffect(() => {
     const fetchPatients = async () => {
-      setLoading(true);
       try {
         const doctorId = localStorage.getItem('doctorId');
         if (doctorId) {
@@ -40,17 +38,16 @@ const AnalysisForm = () => {
           setError("Doctor ID is missing.");
         }
       } catch (err) {
-        setError("Erreur lors de la récupération des patients.");
-        console.error(err);
+        setError(err);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchPatients();
   }, []);
 
-  // Gérer les changements dans les champs du formulaire
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -58,23 +55,10 @@ const AnalysisForm = () => {
     });
   };
 
-  // Gérer la soumission du formulaire
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    const doctorId = localStorage.getItem('doctorId');  // Récupération de l'ID du médecin
-    if (!doctorId) {
-      setError("Doctor ID is missing.");
-      return;
-    }
-
-    // Ajout de created_by dans les données envoyées (en s'assurant que c'est un entier)
-    const dataWithDoctorId = { 
-      ...formData, 
-      created_by: parseInt(doctorId), // Assurez-vous que c'est un entier
-    };
-
-    // Déterminer l'URL de l'API en fonction du type d'analyse
+    // Déterminer l'URL selon le type d'analyse
     let apiUrl = '';
     switch (formData.analysisType) {
       case 'common':
@@ -94,214 +78,194 @@ const AnalysisForm = () => {
         return;
     }
 
-    try {
-      // Soumettre les données à l'API
-      const response = await axios.post(apiUrl, dataWithDoctorId);
-      setSuccessMessage(response.data.message || 'Analyse ajoutée avec succès !');
-
-      // Réinitialiser le formulaire après soumission
-      setFormData({
-        patient: '',
-        red_blood_cells: '',
-        white_blood_cells: '',
-        platelets: '',
-        hemoglobin: '',
-        hematocrit: '',
-        chol_total: '',
-        chol_hdl: '',
-        chol_ldl: '',
-        chol_triglycerides: '',
-        ist_vih: '',
-        ist_syphilis: '',
-        diabete_glucose: '',
-        diabete_hba1c: '',
-        date: '',
-        result_positive: false,
-        analysisType: ''
+    // Envoyer les données au backend
+    axios.post(apiUrl, formData)
+      .then(response => {
+        setSuccessMessage(response.data.message || 'Analyse ajoutée avec succès !');
+        setFormData({
+          patient: '',
+          red_blood_cells: '',
+          white_blood_cells: '',
+          platelets: '',
+          hemoglobin: '',
+          hematocrit: '',
+          chol_total: '',
+          chol_hdl: '',
+          chol_ldl: '',
+          chol_triglycerides: '',
+          ist_vih: '',
+          ist_syphilis: '',
+          diabete_glucose: '',
+          diabete_hba1c: '',
+          date: '',
+          result_positive: false,
+          analysisType: ''
+        });
+      })
+      .catch(error => {
+        console.error('Erreur lors de la soumission du formulaire :', error);
       });
-    } catch (error) {
-      setError("Erreur lors de la soumission de l'analyse.");
-      console.error(error);
+  };
+
+  const styles = {
+    form: {
+      backgroundColor: '#1e293b', // bluegray-800 (Fond foncé)
+      padding: '40px', // Augmenter la marge interne pour donner de la place
+      borderRadius: '8px',
+      boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+      maxWidth: '800px',
+      margin: '0 auto', // Centré horizontalement
+      fontFamily: 'Arial, sans-serif',
+      color: '#f1f5f9', // Texte clair (bluegray-100)
+      marginTop: '100px', // Propriété pour déplacer le formulaire vers le bas
+      height: 'auto', // Permet au formulaire de s'adapter
+      minHeight: '600px', // Définir une hauteur minimale pour le formulaire
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'flex-start',
+    },
+    label: {
+      display: 'block',
+      marginBottom: '25px', // Augmenter l'espacement entre les labels
+      fontWeight: '800', // Applique le poids de police 800 pour les labels
+      color: '#f1f5f9' // Texte clair
+    },
+    input: {
+      width: '100%',
+      padding: '12px', // Plus de padding pour une meilleure lisibilité
+      marginBottom: '20px',
+      border: '1px solid #94a3b8', // bluegray-400
+      borderRadius: '4px',
+      boxSizing: 'border-box',
+      backgroundColor: '#FFF', // Texte sombre sur fond foncé
+      color: 'black' // Texte clair
+    },
+    checkbox: {
+      marginRight: '10px'
+    },
+    button: {
+      backgroundColor: '#64748b', // bluegray-500
+      color: '#ffffff',
+      padding: '12px 24px', // Plus de padding pour un bouton plus large
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      transition: 'background-color 0.3s',
+      fontWeight: '800' // Applique le poids de police 800 sur le bouton
+    },
+    buttonHover: {
+      backgroundColor: '#94a3b8' // bluegray-400 pour hover
+    },
+    successMessage: {
+      color: '#22c55e', // Vert pour succès
+      fontWeight: '800', // Applique le poids de police 800 au message de succès
+      textAlign: 'center',
+      margin: '20px 0'
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      {/* Affichage du message de succès */}
-      {successMessage && <div>{successMessage}</div>}
-      {/* Affichage du message d'erreur */}
-      {error && <div>{error}</div>}
-
-      {/* Champ patient */}
-      <div>
-        <label htmlFor="patient">Patient</label>
-        <select
-          id="patient"
-          name="patient"
-          value={formData.patient}
-          onChange={handleChange}
-          required
-        >
+    <form onSubmit={handleSubmit} style={styles.form}>
+      {successMessage && <div style={styles.successMessage}>{successMessage}</div>}
+      <label style={styles.label}>
+        Patient:
+        <select name="patient" value={formData.patient} onChange={handleChange} style={styles.input}>
           <option value="">Sélectionner un patient</option>
           {patients.map((patient) => (
-            <option key={patient.id} value={patient.id}>{patient.name}</option>
+            <option key={patient.id} value={patient.id}>
+              {patient.nom} {patient.prenom}
+            </option>
           ))}
         </select>
-      </div>
-
-      {/* Autres champs d'analyse */}
-      <div>
-        <label htmlFor="red_blood_cells">Globules rouges</label>
-        <input
-          type="number"
-          id="red_blood_cells"
-          name="red_blood_cells"
-          value={formData.red_blood_cells}
-          onChange={handleChange}
-          required
-        />
-      </div>
-
-      <div>
-        <label htmlFor="white_blood_cells">Globules blancs</label>
-        <input
-          type="number"
-          id="white_blood_cells"
-          name="white_blood_cells"
-          value={formData.white_blood_cells}
-          onChange={handleChange}
-          required
-        />
-      </div>
-
-      <div>
-        <label htmlFor="platelets">Plaquettes</label>
-        <input
-          type="number"
-          id="platelets"
-          name="platelets"
-          value={formData.platelets}
-          onChange={handleChange}
-          required
-        />
-      </div>
-
-      <div>
-        <label htmlFor="hemoglobin">Hémoglobine</label>
-        <input
-          type="number"
-          id="hemoglobin"
-          name="hemoglobin"
-          value={formData.hemoglobin}
-          onChange={handleChange}
-          required
-        />
-      </div>
-
-      <div>
-        <label htmlFor="hematocrit">Hématocrite</label>
-        <input
-          type="number"
-          id="hematocrit"
-          name="hematocrit"
-          value={formData.hematocrit}
-          onChange={handleChange}
-          required
-        />
-      </div>
-
-      {/* Champs pour cholestérol et diabète */}
-      <div>
-        <label htmlFor="chol_total">Cholestérol Total</label>
-        <input
-          type="number"
-          id="chol_total"
-          name="chol_total"
-          value={formData.chol_total}
-          onChange={handleChange}
-        />
-      </div>
-
-      <div>
-        <label htmlFor="chol_hdl">Cholestérol HDL</label>
-        <input
-          type="number"
-          id="chol_hdl"
-          name="chol_hdl"
-          value={formData.chol_hdl}
-          onChange={handleChange}
-        />
-      </div>
-
-      <div>
-        <label htmlFor="chol_ldl">Cholestérol LDL</label>
-        <input
-          type="number"
-          id="chol_ldl"
-          name="chol_ldl"
-          value={formData.chol_ldl}
-          onChange={handleChange}
-        />
-      </div>
-
-      <div>
-        <label htmlFor="chol_triglycerides">Triglycérides</label>
-        <input
-          type="number"
-          id="chol_triglycerides"
-          name="chol_triglycerides"
-          value={formData.chol_triglycerides}
-          onChange={handleChange}
-        />
-      </div>
-
-      {/* Type d'analyse */}
-      <div>
-        <label htmlFor="analysisType">Type d'analyse</label>
-        <select
-          id="analysisType"
-          name="analysisType"
-          value={formData.analysisType}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Sélectionner le type d'analyse</option>
-          <option value="common">Analyse Commune</option>
+      </label>
+      <label style={styles.label}>
+        Type d'analyse:
+        <select name="analysisType" value={formData.analysisType} onChange={handleChange} style={styles.input}>
+          <option value="">Sélectionner</option>
+          <option value="common">Courant</option>
           <option value="cholesterol">Cholestérol</option>
           <option value="ist">IST</option>
           <option value="diabetes">Diabète</option>
         </select>
-      </div>
-
-      {/* Date de l'analyse */}
-      <div>
-        <label htmlFor="date">Date de l'analyse</label>
-        <input
-          type="date"
-          id="date"
-          name="date"
-          value={formData.date}
-          onChange={handleChange}
-          required
-        />
-      </div>
-
-      {/* Résultat positif */}
-      <div>
-        <label htmlFor="result_positive">Résultat positif</label>
-        <input
-          type="checkbox"
-          id="result_positive"
-          name="result_positive"
-          checked={formData.result_positive}
-          onChange={() => setFormData({ ...formData, result_positive: !formData.result_positive })}
-        />
-      </div>
-
-      {/* Soumettre le formulaire */}
-      <button type="submit" disabled={loading}>
-        {loading ? 'En cours...' : 'Soumettre'}
-      </button>
+      </label>
+      {/* Champs dynamiques basés sur le type d'analyse */}
+      {formData.analysisType === 'common' && (
+        <>
+          <label style={styles.label}>
+            Globules rouges:
+            <input type="number" name="red_blood_cells" value={formData.red_blood_cells} onChange={handleChange} style={styles.input} />
+          </label>
+          <label style={styles.label}>
+            Globules blancs:
+            <input type="number" name="white_blood_cells" value={formData.white_blood_cells} onChange={handleChange} style={styles.input} />
+          </label>
+          <label style={styles.label}>
+            Plaquettes:
+            <input type="number" name="platelets" value={formData.platelets} onChange={handleChange} style={styles.input} />
+          </label>
+          <label style={styles.label}>
+            Hémoglobine:
+            <input type="number" name="hemoglobin" value={formData.hemoglobin} onChange={handleChange} style={styles.input} />
+          </label>
+          <label style={styles.label}>
+            Hématocrites:
+            <input type="number" name="hematocrit" value={formData.hematocrit} onChange={handleChange} style={styles.input} />
+          </label>
+        </>
+      )}
+      {formData.analysisType === 'cholesterol' && (
+        <>
+          <label style={styles.label}>
+            Cholestérol total:
+            <input type="number" name="chol_total" value={formData.chol_total} onChange={handleChange} style={styles.input} />
+          </label>
+          <label style={styles.label}>
+            HDL:
+            <input type="number" name="chol_hdl" value={formData.chol_hdl} onChange={handleChange} style={styles.input} />
+          </label>
+          <label style={styles.label}>
+            LDL:
+            <input type="number" name="chol_ldl" value={formData.chol_ldl} onChange={handleChange} style={styles.input} />
+          </label>
+          <label style={styles.label}>
+            Triglycérides:
+            <input type="number" name="chol_triglycerides" value={formData.chol_triglycerides} onChange={handleChange} style={styles.input} />
+          </label>
+        </>
+      )}
+      {formData.analysisType === 'ist' && (
+        <>
+          <label style={styles.label}>
+            VIH:
+            <input type="text" name="ist_vih" value={formData.ist_vih} onChange={handleChange} style={styles.input} />
+          </label>
+          <label style={styles.label}>
+            Syphilis:
+            <input type="text" name="ist_syphilis" value={formData.ist_syphilis} onChange={handleChange} style={styles.input} />
+          </label>
+        </>
+      )}
+      {formData.analysisType === 'diabetes' && (
+        <>
+          <label style={styles.label}>
+            Glucose:
+            <input type="number" name="diabete_glucose" value={formData.diabete_glucose} onChange={handleChange} style={styles.input} />
+          </label>
+          <label style={styles.label}>
+            HbA1c:
+            <input type="number" name="diabete_hba1c" value={formData.diabete_hba1c} onChange={handleChange} style={styles.input} />
+          </label>
+        </>
+      )}
+      <label style={styles.label}>
+        Date:
+        <input type="date" name="date" value={formData.date} onChange={handleChange} style={styles.input} />
+      </label>
+      <label style={styles.label}>
+        Résultat positif:
+        <input type="checkbox" name="result_positive" checked={formData.result_positive} onChange={(e) => setFormData({ ...formData, result_positive: e.target.checked })} style={styles.checkbox} />
+      </label>
+      <button type="submit" style={styles.button}>Soumettre</button>
     </form>
   );
 };

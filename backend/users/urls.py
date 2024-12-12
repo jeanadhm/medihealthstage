@@ -33,6 +33,6 @@ urlpatterns = [
     path('demandes/', DemandesAPIView.as_view(), name='demandes-list'),
     path('demandes/<int:pk>/', DemandesAPIView.as_view(), name='demandes-detail'),
     path('rdvs/patient/all',list_demandes_patient, name='list_demandes_patient'),
-    path('rdvs/doctor/all',list_demandes_doctor, name='list_demandes_doctor'),
+    path('rdvs/doctor/all/',list_demandes_doctor, name='list_demandes_doctor'),
     path('demandes/<int:pk>/status/',update_demandes_status, name='update_demandes_status'),
 ]

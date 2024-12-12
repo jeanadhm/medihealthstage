@@ -333,47 +333,6 @@ class DemandesAPIView(APIView):
         demande.status = request.data['status']
         demande.save()
         return Response({'message': f"Demande mise à jour avec le statut '{demande.get_status_display()}'."}, status=status.HTTP_200_OK)
-
-
-@api_view(['GET'])
-def list_demandes_patient(request):
-    # Récupérer l'ID du patient depuis les paramètres de la requête GET
-    patient_id = request.query_params.get('patientId')  
-
-    if patient_id:
-        try:
-            # Filtrer les demandes par l'ID du patient
-            demandes = Demandes.objects.filter(patient_id=patient_id)
-
-            # Créer une liste de demandes avec les informations du docteur et le statut
-            demandes_data = []
-            for demande in demandes:
-                doctor = demande.doctor  # Ici, doctor est une relation ForeignKey (assurez-vous que c'est bien un objet, pas un ID)
-
-                # Si la relation est correcte, doctor sera un objet Doctor
-                doctor_name = f"{doctor.nom} {doctor.prenoms}"
-
-                # Récupérer le statut de la demande
-                status = demande.status
-
-                demande_data = {
-                    'id': demande.id,
-                    'patient_id': demande.patient_id,
-                    'date': demande.date,
-                    'time': demande.time,
-                    'instructions': demande.instructions,
-                    'doctor_name': doctor_name, 
-                    'status': status  
-                }
-
-                demandes_data.append(demande_data)
-
-            return Response(demandes_data)
-
-        except Demandes.DoesNotExist:
-            return Response({"detail": "Aucune demande trouvée pour ce patient."}, status=404)
-    else:
-        return Response({"detail": "Patient ID is required"}, status=400)
     
 
 @api_view(['GET'])
