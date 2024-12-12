@@ -6,7 +6,7 @@ import PatientSidebar from "components/Sidebar/PatientSidebar";
 
 // views spécifiques au patient
 import PatientRdv from "views/patient/rdvpatients";
-import Chat from "views/patient/consultspatient";
+import PatientChat from "views/patient/consultspatient";
 import Hospitals from "views/patient/hospitals";
 import UserProfile from "views/patient/profilepat";
 import Myresults from "views/patient/results";
@@ -24,7 +24,7 @@ export default function Patient() {
           <Routes>
             {/* Routes spécifiques au patient */}
             <Route path="rdv" element={<PatientRdv />} />
-            <Route path="myconsultations" element={<Chat />} />
+            <Route path="myconsultations" element={<PatientChat />} />
             <Route path="settings" element={<Settings />} />
             <Route path="hospitals" element={<Hospitals />} />
             <Route path="profile" element={<UserProfile />} />

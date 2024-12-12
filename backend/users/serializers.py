@@ -1,6 +1,6 @@
 # users/serializers.py
 from rest_framework import serializers
-from .models import Patient, Doctor, RendezVous,Appointment, Rdv, Consultation, CustomUser, Demandes
+from .models import Patient, Doctor, RendezVous,Appointment, Rdv, Consultation, CustomUser, Demandes, Message
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
 
@@ -127,3 +127,9 @@ class DemandesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Demandes
         fields = '__all__'
+
+
+class MessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ['id', 'sender', 'receiver', 'content', 'timestamp', 'is_read']

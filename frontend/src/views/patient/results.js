@@ -26,7 +26,7 @@ const MyResults = () => {
 
       try {
         const response = await fetch(
-          `http://127.0.0.1:8000/analyses/all/?patient_id=${patientId}`
+          `http://127.0.0.1:8000/analyses/all/${patientId}/`
         );
         if (response.ok) {
           const data = await response.json();

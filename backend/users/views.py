@@ -3,8 +3,8 @@ from rest_framework import generics
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
-from .models import CustomUser, Doctor, Patient, RendezVous,Appointment, Rdv, Consultation, Demandes
-from .serializers import DoctorSerializer, CustomUserSerializer, RendezVousSerializer, PatientSerializer,AppointmentSerializer, CreateAppointmentSerializer, RdvSerializer, ConsultationSerializer, DemandesSerializer
+from .models import CustomUser, Doctor, Patient, RendezVous,Appointment, Rdv, Consultation, Demandes, Message
+from .serializers import DoctorSerializer, CustomUserSerializer, RendezVousSerializer, PatientSerializer,AppointmentSerializer, CreateAppointmentSerializer, RdvSerializer, ConsultationSerializer, DemandesSerializer, MessageSerializer
 from django.contrib.auth.hashers import make_password
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -18,6 +18,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import NotFound
+from django.db import models
 
 
 class DoctorView(viewsets.ModelViewSet):
@@ -434,3 +435,35 @@ def update_demandes_status(request, pk):
         return Response({'error': 'Demande non trouvée.'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+class MessageListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Obtenir les messages échangés entre l'utilisateur connecté et un autre utilisateur
+        user = request.user
+        chat_with = request.query_params.get('chat_with')  # ID de l'autre utilisateur
+        if not chat_with:
+            return Response({"error": "Veuillez spécifier un utilisateur pour voir les messages."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        messages = Message.objects.filter(
+            (models.Q(sender=user) & models.Q(receiver_id=chat_with)) |
+            (models.Q(sender_id=chat_with) & models.Q(receiver=user))
+        )
+        messages.update(is_read=True)
+        serializer = MessageSerializer(messages, many=True)
+        return Response(serializer.data)
+
+class SendMessageView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = request.data
+        data['sender'] = request.user.id  # Ajouter automatiquement l'expéditeur
+        serializer = MessageSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
