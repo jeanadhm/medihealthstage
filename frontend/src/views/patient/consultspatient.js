@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const PatientChat = () => {
-    const [doctors, setDoctors] = useState([]);
-    const [selectedDoctor, setSelectedDoctor] = useState(null); // Docteur sélectionné
+    const [patients, setPatients] = useState([]);
+    const [selectedPatient, setSelectedPatient] = useState(null); // Docteur sélectionné
     const [messages, setMessages] = useState([]); // Messages avec le docteur sélectionné
     const [message, setMessage] = useState(''); // Message à envoyer
 
@@ -49,7 +49,7 @@ const PatientChat = () => {
     useEffect(() => {
         axios.get('/doctors/')
             .then((response) => {
-                setDoctors(response.data);
+                setPatients(response.data);
             })
             .catch((error) => {
                 console.error('Erreur lors de la récupération des docteurs :', error);
@@ -58,8 +58,8 @@ const PatientChat = () => {
 
     // Récupérer les messages avec le docteur sélectionné
     useEffect(() => {
-        if (selectedDoctor) {
-            axios.get(`/messages/?chat_with=${selectedDoctor.id}`)
+        if (selectedPatient) {
+            axios.get(`/messages/?chat_with=${selectedPatient.id}`)
                 .then((response) => {
                     setMessages(response.data);
                 })
@@ -67,14 +67,14 @@ const PatientChat = () => {
                     console.error('Erreur lors de la récupération des messages :', error);
                 });
         }
-    }, [selectedDoctor]);
+    }, [selectedPatient]);
 
     // Envoyer un message
     const handleSendMessage = () => {
-        if (message.trim() && selectedDoctor) {
+        if (message.trim() && selectedPatient) {
             const newMessage = {
                 content: message, // Nom correspondant au champ dans votre serializer
-                receiver: selectedDoctor.id,
+                receiver: selectedPatient.id,
             };
 
             axios.post('/messages/send/', newMessage)
@@ -92,18 +92,18 @@ const PatientChat = () => {
         <div style={styles.container}>
             <div style={styles.sidebar}>
                 <h3 style={styles.heading}>Docteurs</h3>
-                <ul style={styles.doctorList}>
-                    {doctors.length > 0 ? (
-                        doctors.map((doctor) => (
+                <ul style={styles.patientList}>
+                    {patients.length > 0 ? (
+                        patients.map((patient) => (
                             <li
-                                key={doctor.id}
+                                key={patient.id}
                                 style={{
-                                    ...styles.doctorItem,
-                                    backgroundColor: selectedDoctor?.id === doctor.id ? '#d3f8d3' : 'white',
+                                    ...styles.patientItem,
+                                    backgroundColor: selectedPatient?.id === patient.id ? '#d3f8d3' : 'white',
                                 }}
-                                onClick={() => setSelectedDoctor(doctor)}
+                                onClick={() => setSelectedPatient(patient)}
                             >
-                                {doctor.nom} {doctor.prenoms}
+                                {patient.nom} {patient.prenoms}
                             </li>
                         ))
                     ) : (
@@ -112,28 +112,37 @@ const PatientChat = () => {
                 </ul>
             </div>
             <div style={styles.chatBox}>
-                {selectedDoctor ? (
+                {selectedPatient ? (
                     <>
-                        <h3 style={styles.heading}>Conversation avec Dr. {selectedDoctor.nom} {selectedDoctor.prenoms}</h3>
+                        <h3 style={styles.heading}>Conversation avec Dr. {selectedPatient.nom} {selectedPatient.prenoms}</h3>
                         <div style={styles.messages}>
-                            {messages.length > 0 ? (
-                                messages.map((msg, index) => (
-                                    <div
-                                        key={index}
-                                        style={
-                                            msg.sender === localStorage.getItem('id')
-                                                ? styles.sentMessage
-                                                : styles.receivedMessage
-                                        }
-                                    >
-                                        <p style={styles.text}>{msg.content}</p>
-                                        <small style={styles.timestamp}>{new Date(msg.timestamp).toLocaleTimeString()}</small>
-                                    </div>
-                                ))
-                            ) : (
-                                <p style={styles.placeholder}>Aucun message pour l'instant.</p>
-                            )}
-                        </div>
+    {messages.length > 0 ? (
+        messages.map((msg, index) => {
+            const isSenderPatient = msg.sender === selectedPatient.id; // Condition pour savoir si c'est le docteur ou le patient
+            return (
+                <div
+                    key={index}
+                    style={
+                        isSenderPatient
+                            ? styles.receivedMessage // Message reçu (docteur)
+                            : styles.sentMessage // Message envoyé (patient)
+                    }
+                >
+                    <p style={styles.text}>{msg.content}</p>
+                    <div style={styles.messageFooter}>
+                        <small style={styles.timestamp}>{new Date(msg.timestamp).toLocaleTimeString()}</small>
+                        <span style={styles.userLabel}>
+                            {isSenderPatient ? "Docteur" : "Patient"}
+                        </span>
+                    </div>
+                </div>
+            );
+        })
+    ) : (
+        <p style={styles.placeholder}>Aucun message pour l'instant.</p>
+    )}
+</div>
+
                         <div style={styles.inputContainer}>
                             <input
                                 type="text"
@@ -166,12 +175,12 @@ const styles = {
         padding: '10px',
         overflowY: 'auto',
     },
-    doctorList: {
+    patientList: {
         listStyleType: 'none',
         padding: 0,
         margin: 0,
     },
-    doctorItem: {
+    patientItem: {
         padding: '10px',
         cursor: 'pointer',
         borderBottom: '1px solid #eee',
@@ -248,4 +257,3 @@ const styles = {
 };
 
 export default PatientChat;
-

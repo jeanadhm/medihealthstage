@@ -50,7 +50,7 @@ const MedicalRecord = () => {
   const fetchMedicalRecords = async (patientId) => {
     try {
       const response = await axios.get(
-        `http://127.0.0.1:8000/api/dossiermedical/?patientId=${patientId}`
+        `http://127.0.0.1:8000/analyses/dossiermedical/list/${patientId}`
       );
       setMedicalRecords(response.data);
     } catch (err) {
@@ -65,32 +65,9 @@ const MedicalRecord = () => {
   };
 
   // Gestion du formulaire d'ajout de dossier médical
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewRecord({ ...newRecord, [name]: value });
-  };
+  
 
-  const handleAddMedicalRecord = async (e) => {
-    e.preventDefault();
-    try {
-      const recordData = {
-        ...newRecord,
-        patient: selectedPatient.id,
-        created_by: localStorage.getItem("doctorId"),
-      };
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/dossiermedical/",
-        recordData
-      );
-      setMedicalRecords([...medicalRecords, response.data]);
-      setShowAddForm(false);
-      setNewRecord({ type: "", details: "", date: "" });
-    } catch (err) {
-      console.error("Erreur lors de l'ajout du dossier médical:", err.message);
-      alert(`Erreur : ${err.response?.data.detail || "Erreur inconnue."}`);
-    }
-  };
-
+  
   if (loading) return <Typography>Loading...</Typography>;
   if (error) return <Typography color="error">Error: {error}</Typography>;
 
@@ -160,70 +137,12 @@ const MedicalRecord = () => {
               </TableBody>
             </Table>
           </TableContainer>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => setShowAddForm(true)}
-            sx={{ marginTop: 2 }}
-          >
-            Ajouter un élément au Dossier
-          </Button>
+          
         </Box>
-      )}
+      
 
-      {/* Formulaire d'ajout */}
-      {showAddForm && (
-        <Modal open={showAddForm} onClose={() => setShowAddForm(false)}>
-          <Box
-            component="form"
-            onSubmit={handleAddMedicalRecord}
-            sx={{
-              backgroundColor: "white",
-              padding: 3,
-              margin: "auto",
-              marginTop: "15%",
-              borderRadius: 2,
-            }}
-          >
-            <Typography variant="h6" gutterBottom>
-              Ajouter un élément au dossier médical
-            </Typography>
-            <TextField
-              label="Type (e.g. Consultation, Analyse)"
-              name="type"
-              value={newRecord.type}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              label="Détails"
-              name="details"
-              value={newRecord.details}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              label="Date"
-              type="date"
-              name="date"
-              value={newRecord.date}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-              InputLabelProps={{ shrink: true }}
-            />
-            <Button
-              type="submit"
-              variant="contained"
-              color="success"
-              sx={{ marginTop: 2 }}
-            >
-              Enregistrer
-            </Button>
-          </Box>
-        </Modal>
+      
+        
       )}
     </Box>
   );

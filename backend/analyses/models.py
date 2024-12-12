@@ -61,40 +61,89 @@ class DiabetesAnalysis(models.Model):
 
 
 class DossierMedical(models.Model):
-    patient = models.OneToOneField(Patient, on_delete=models.CASCADE)
-    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='dossiers')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    # Relations principales
+    patient = models.OneToOneField(
+        Patient, 
+        on_delete=models.CASCADE, 
+        help_text="Le patient auquel ce dossier médical est associé."
+    )
+    doctor = models.ForeignKey(
+        Doctor, 
+        on_delete=models.CASCADE, 
+        related_name='dossiers', 
+        help_text="Le docteur responsable de ce dossier médical."
+    )
+    created_by = models.ForeignKey(
+        Doctor, 
+        on_delete=models.CASCADE, 
+        related_name='dossiers_created', 
+        null=True, 
+        blank=True, 
+        help_text="Le docteur ayant créé ce dossier médical."
+    )
 
-    # Liens vers les analyses
-    common_analyses = models.ManyToManyField(CommonAnalysis, blank=True)
-    cholesterol_analyses = models.ManyToManyField(CholesterolAnalysis, blank=True)
-    ist_analyses = models.ManyToManyField(IstAnalysis, blank=True)
-    diabetes_analyses = models.ManyToManyField(DiabetesAnalysis, blank=True)
+    # Dates de création et de mise à jour
+    created_at = models.DateTimeField(auto_now_add=True, help_text="Date de création du dossier.")
+    updated_at = models.DateTimeField(auto_now=True, help_text="Date de dernière mise à jour du dossier.")
 
-    # Liens vers les consultations et les rendez-vous
-    consultations = models.ManyToManyField(Consultation, blank=True)
-    rendezvous = models.ManyToManyField(Rdv, blank=True)
+    # Analyses médicales
+    common_analyses = models.ManyToManyField(
+        CommonAnalysis, 
+        blank=True, 
+        help_text="Liste des analyses sanguines communes associées au patient."
+    )
+    cholesterol_analyses = models.ManyToManyField(
+        CholesterolAnalysis, 
+        blank=True, 
+        help_text="Liste des analyses de cholestérol associées au patient."
+    )
+    ist_analyses = models.ManyToManyField(
+        IstAnalysis, 
+        blank=True, 
+        help_text="Liste des analyses IST associées au patient."
+    )
+    diabetes_analyses = models.ManyToManyField(
+        DiabetesAnalysis, 
+        blank=True, 
+        help_text="Liste des analyses de diabète associées au patient."
+    )
 
-    created_by = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='dossiers_created', null=True, blank=True)
+    # Consultations et rendez-vous
+    consultations = models.ManyToManyField(
+        Consultation, 
+        blank=True, 
+        help_text="Liste des consultations associées au patient."
+    )
+    rendezvous = models.ManyToManyField(
+        Rdv, 
+        blank=True, 
+        help_text="Liste des rendez-vous associés au patient."
+    )
 
-
-
-
+    # Méthodes d'ajout pour les relations ManyToMany
     def add_common_analysis(self, analysis):
+        """Ajoute une analyse sanguine commune au dossier médical."""
         self.common_analyses.add(analysis)
 
     def add_cholesterol_analysis(self, analysis):
+        """Ajoute une analyse de cholestérol au dossier médical."""
         self.cholesterol_analyses.add(analysis)
 
     def add_ist_analysis(self, analysis):
+        """Ajoute une analyse IST au dossier médical."""
         self.ist_analyses.add(analysis)
 
     def add_diabetes_analysis(self, analysis):
+        """Ajoute une analyse de diabète au dossier médical."""
         self.diabetes_analyses.add(analysis)
 
     def add_consultation(self, consultation):
+        """Ajoute une consultation au dossier médical."""
         self.consultations.add(consultation)
 
     def add_rendezvous(self, rendezvous):
+        """Ajoute un rendez-vous au dossier médical."""
         self.rendezvous.add(rendezvous)
+
+    def __str__(self):
+        return f"Dossier Médical de {self.patient.nom} {self.patient.prenoms} (Docteur: {self.doctor.nom})"

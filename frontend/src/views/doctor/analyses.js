@@ -29,8 +29,16 @@ const AnalysisForm = () => {
 
   useEffect(() => {
     const fetchPatients = async () => {
+      setLoading(true);
       try {
-        const doctorId = localStorage.getItem('doctorId');
+        const doctorId = parseInt(localStorage.getItem('doctorId'), 10);
+
+// Vérifiez si la conversion a réussi
+if (isNaN(doctorId)) {
+  console.error('Doctor ID is not a valid number.');
+} else {
+  console.log('Doctor ID as integer:', doctorId);
+}
         if (doctorId) {
           const response = await axios.get(`http://127.0.0.1:8000/api/patients/?doctorId=${doctorId}`);
           setPatients(response.data);
@@ -38,15 +46,14 @@ const AnalysisForm = () => {
           setError("Doctor ID is missing.");
         }
       } catch (err) {
-        setError(err);
+        setError(err.message || 'Failed to load patients.');
       } finally {
         setLoading(false);
       }
     };
-  
+
     fetchPatients();
   }, []);
-
 
   const handleChange = (e) => {
     setFormData({
@@ -57,7 +64,24 @@ const AnalysisForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
+  
+    // Récupérer l'ID du docteur depuis localStorage et le convertir en entier
+    const doctorId = parseInt(localStorage.getItem('doctorId'), 10);  // Conversion en entier
+    const createdById = doctorId;  // L'ID de l'utilisateur créant l'analyse, supposé être le même que le docteur
+  
+    if (isNaN(doctorId)) {
+      alert("Doctor ID is missing or invalid.");
+      return;
+    }
+  
+    const dataToSubmit = {
+      ...formData,
+      doctor: doctorId,  // Ajout de l'ID du docteur
+      created_by: createdById  // Ajout de l'ID de l'utilisateur ayant créé l'analyse
+    };
+  
+    console.log("Data being sent:", dataToSubmit);  // Ajout d'un log pour voir les données envoyées
+  
     // Déterminer l'URL selon le type d'analyse
     let apiUrl = '';
     switch (formData.analysisType) {
@@ -77,9 +101,9 @@ const AnalysisForm = () => {
         alert("Veuillez sélectionner un type d'analyse.");
         return;
     }
-
+  
     // Envoyer les données au backend
-    axios.post(apiUrl, formData)
+    axios.post(apiUrl, dataToSubmit)
       .then(response => {
         setSuccessMessage(response.data.message || 'Analyse ajoutée avec succès !');
         setFormData({
@@ -106,59 +130,56 @@ const AnalysisForm = () => {
         console.error('Erreur lors de la soumission du formulaire :', error);
       });
   };
-
+  
+  // Styles du formulaire
   const styles = {
     form: {
-      backgroundColor: '#1e293b', // bluegray-800 (Fond foncé)
-      padding: '40px', // Augmenter la marge interne pour donner de la place
+      backgroundColor: '#1e293b',
+      padding: '40px',
       borderRadius: '8px',
       boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
       maxWidth: '800px',
-      margin: '0 auto', // Centré horizontalement
+      margin: '0 auto',
       fontFamily: 'Arial, sans-serif',
-      color: '#f1f5f9', // Texte clair (bluegray-100)
-      marginTop: '100px', // Propriété pour déplacer le formulaire vers le bas
-      height: 'auto', // Permet au formulaire de s'adapter
-      minHeight: '600px', // Définir une hauteur minimale pour le formulaire
+      color: '#f1f5f9',
+      marginTop: '100px',
+      height: 'auto',
+      minHeight: '600px',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'flex-start',
     },
     label: {
       display: 'block',
-      marginBottom: '25px', // Augmenter l'espacement entre les labels
-      fontWeight: '800', // Applique le poids de police 800 pour les labels
-      color: '#f1f5f9' // Texte clair
+      marginBottom: '25px',
+      fontWeight: '800',
+      color: '#f1f5f9'
     },
     input: {
       width: '100%',
-      padding: '12px', // Plus de padding pour une meilleure lisibilité
+      padding: '12px',
       marginBottom: '20px',
-      border: '1px solid #94a3b8', // bluegray-400
+      border: '1px solid #94a3b8',
       borderRadius: '4px',
       boxSizing: 'border-box',
-      backgroundColor: '#FFF', // Texte sombre sur fond foncé
-      color: 'black' // Texte clair
+      backgroundColor: '#FFF',
+      color: 'black'
     },
     checkbox: {
       marginRight: '10px'
     },
     button: {
-      backgroundColor: '#64748b', // bluegray-500
+      backgroundColor: '#64748b',
       color: '#ffffff',
-      padding: '12px 24px', // Plus de padding pour un bouton plus large
+      padding: '12px 24px',
       border: 'none',
       borderRadius: '4px',
       cursor: 'pointer',
-      transition: 'background-color 0.3s',
-      fontWeight: '800' // Applique le poids de police 800 sur le bouton
-    },
-    buttonHover: {
-      backgroundColor: '#94a3b8' // bluegray-400 pour hover
+      fontWeight: '800'
     },
     successMessage: {
-      color: '#22c55e', // Vert pour succès
-      fontWeight: '800', // Applique le poids de police 800 au message de succès
+      color: '#22c55e',
+      fontWeight: '800',
       textAlign: 'center',
       margin: '20px 0'
     }
@@ -167,6 +188,7 @@ const AnalysisForm = () => {
   return (
     <form onSubmit={handleSubmit} style={styles.form}>
       {successMessage && <div style={styles.successMessage}>{successMessage}</div>}
+      {error && <div style={{ color: 'red', textAlign: 'center', marginBottom: '20px' }}>{error}</div>}
       <label style={styles.label}>
         Patient:
         <select name="patient" value={formData.patient} onChange={handleChange} style={styles.input}>

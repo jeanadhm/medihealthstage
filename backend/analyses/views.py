@@ -140,45 +140,70 @@ def save_analysis(request):
     else:
         return JsonResponse({"error": "Method not allowed"}, status=405)
 
+
 logger = logging.getLogger(__name__)
 
 class AllAnalysesListView(APIView):
     def get(self, request, *args, **kwargs):
-        doctor_id = kwargs.get('pk')
-        logger.info(f"Doctor ID: {doctor_id}")
+        # Récupération de l'ID de l'utilisateur via kwargs
+        user_id = kwargs.get('pk')
+        user_type = kwargs.get('type')  # Correction
 
-        if not doctor_id:
-            logger.error("Doctor ID is missing")
-            return Response({"error": "Doctor ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        logger.info(f"User ID: {user_id}, Type: {user_type}")
 
-        try:
-            doctor = Doctor.objects.get(id=doctor_id)
-            logger.info(f"Doctor found: {doctor}")
-        except Doctor.DoesNotExist:
-            logger.error("Doctor not found")
-            return Response({"error": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
+        # Vérifier si un user_id est fourni
+        if not user_id or not user_type:
+            logger.error("User ID or type is missing")
+            return Response({"error": "User ID and type are required"}, status=status.HTTP_400_BAD_REQUEST)
 
+        if user_type == "doctor":
+            # Vérifier que le docteur existe
+            try:
+                doctor = Doctor.objects.get(id=user_id)
+                logger.info(f"Doctor found: {doctor}")
+            except Doctor.DoesNotExist:
+                logger.error("Doctor not found")
+                return Response({"error": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Récupérer les analyses associées au médecin
-        common_analyses = CommonAnalysis.objects.filter(doctor=doctor)
-        cholesterol_analyses = CholesterolAnalysis.objects.filter(doctor=doctor)
-        ist_analyses = IstAnalysis.objects.filter(doctor=doctor)
-        diabetes_analyses = DiabetesAnalysis.objects.filter(doctor=doctor)
+            # Récupérer toutes les analyses associées au docteur
+            analyses = {
+                "common_analyses": CommonAnalysis.objects.filter(doctor=doctor),
+                "cholesterol_analyses": CholesterolAnalysis.objects.filter(doctor=doctor),
+                "ist_analyses": IstAnalysis.objects.filter(doctor=doctor),
+                "diabetes_analyses": DiabetesAnalysis.objects.filter(doctor=doctor),
+            }
 
-        # Sérialiser les données
-        common_serializer = CommonAnalysisSerializer(common_analyses, many=True)
-        cholesterol_serializer = CholesterolAnalysisSerializer(cholesterol_analyses, many=True)
-        ist_serializer = IstAnalysisSerializer(ist_analyses, many=True)
-        diabetes_serializer = DiabetesAnalysisSerializer(diabetes_analyses, many=True)
+        elif user_type == "patient":
+            # Vérifier que le patient existe
+            try:
+                patient = Patient.objects.get(id=user_id)
+                logger.info(f"Patient found: {patient}")
+            except Patient.DoesNotExist:
+                logger.error("Patient not found")
+                return Response({"error": "Patient not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Retourner la réponse
-        return Response({
-            "common_analyses": common_serializer.data,
-            "cholesterol_analyses": cholesterol_serializer.data,
-            "ist_analyses": ist_serializer.data,
-            "diabetes_analyses": diabetes_serializer.data,
-        }, status=status.HTTP_200_OK)
+            # Récupérer toutes les analyses associées au patient
+            analyses = {
+                "common_analyses": CommonAnalysis.objects.filter(patient=patient),
+                "cholesterol_analyses": CholesterolAnalysis.objects.filter(patient=patient),
+                "ist_analyses": IstAnalysis.objects.filter(patient=patient),
+                "diabetes_analyses": DiabetesAnalysis.objects.filter(patient=patient),
+            }
 
+        else:
+            logger.error("Invalid user type")
+            return Response({"error": "Invalid user type"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Sérialiser chaque type d'analyse
+        serialized_data = {
+            "common_analyses": CommonAnalysisSerializer(analyses["common_analyses"], many=True).data,
+            "cholesterol_analyses": CholesterolAnalysisSerializer(analyses["cholesterol_analyses"], many=True).data,
+            "ist_analyses": IstAnalysisSerializer(analyses["ist_analyses"], many=True).data,
+            "diabetes_analyses": DiabetesAnalysisSerializer(analyses["diabetes_analyses"], many=True).data,
+        }
+
+        # Retourner la réponse sérialisée
+        return Response(serialized_data, status=status.HTTP_200_OK)
     
 
 
@@ -230,16 +255,14 @@ class CreateOrUpdateDossierMedicalView(APIView):
         return Response(serializer.data, status=200)
 
 @api_view(['GET'])
-def list_medical_records(request):
-    doctor_id = request.query_params.get('doctorId')  # Récupérer l'ID du docteur depuis les paramètres de la requête
-    
-    if doctor_id:
-        try:
-            # Filtrer les dossiers médicaux par le docteur
-            medical_records = DossierMedical.objects.filter(doctor_id=doctor_id).order_by('patient__nom', 'patient__prenoms')
-            serializer = DossierMedicalSerializer(medical_records, many=True)
-            return Response(serializer.data)
-        except DossierMedical.DoesNotExist:
-            return Response({"detail": "Aucun dossier médical trouvé pour ce docteur."}, status=404)
-    else:
-        return Response({"detail": "L'ID du docteur est requis"}, status=400)
+def list_medical_records(request, pk):
+    try:
+        # Récupérer tous les dossiers médicaux liés au docteur spécifié
+        medical_records = DossierMedical.objects.filter(doctor_id=pk).order_by('patient__nom', 'patient__prenoms')
+        
+        # Sérialisation des données
+        serializer = DossierMedicalSerializer(medical_records, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        # Retourner une erreur générique
+        return Response({"error": str(e)}, status=400)

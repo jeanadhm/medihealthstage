@@ -30,7 +30,7 @@ urlpatterns = [
     path('diabetes/', DiabetesAnalysisListCreateView.as_view(), name='diabetes_analysis_list_create'),
     path('diabetes/<int:pk>/', DiabetesAnalysisDetailView.as_view(), name='diabetes_analysis_detail'),
 
-    path('all/<int:pk>/', AllAnalysesListView.as_view(), name='all_analyses_list'),
+    path('all/<int:pk>/type/<str:type>/', AllAnalysesListView.as_view(), name='all_analyses_list'),
     path('dossiermedical/', CreateOrUpdateDossierMedicalView.as_view(), name='create_or_update_dossier_medical'),
-    path('dossiermedical/list/', list_medical_records, name='list_medical_records'),
+    path('dossiermedical/list/<int:pk>', list_medical_records, name='list_medical_records'),
 ]

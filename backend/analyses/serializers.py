@@ -9,19 +9,32 @@ from django.db import models
 class CommonAnalysisSerializer(serializers.ModelSerializer):
     patient_nom = serializers.SerializerMethodField()
     patient = serializers.PrimaryKeyRelatedField(queryset=Patient.objects.all())  # Champ pour choisir le patient
+    doctor = serializers.PrimaryKeyRelatedField(queryset=Doctor.objects.all(), required=False)  # Docteur connecté
+    created_by = serializers.PrimaryKeyRelatedField(queryset=Doctor.objects.all(), required=False)  # Docteur qui crée l'analyse
 
     class Meta:
         model = CommonAnalysis
         fields = ['id', 'patient', 'date', 'red_blood_cells', 'white_blood_cells', 
-                  'platelets', 'hemoglobin', 'hematocrit', 'patient_nom']
+                  'platelets', 'hemoglobin', 'hematocrit', 'patient_nom', 'doctor', 'created_by']
+
+    def create(self, validated_data):
+        # Récupérer l'ID du docteur depuis le frontend (si envoyé)
+        doctor_id = validated_data.get('doctor')
+        created_by_id = validated_data.get('created_by')
+
+        # Vérifier si ces champs existent dans les données
+        if doctor_id is None:
+            raise serializers.ValidationError("Doctor is required")
+        
+        if created_by_id is None:
+            raise serializers.ValidationError("Created_by is required")
+
+        # Créer l'instance CommonAnalysis avec les données validées
+        common_analysis = CommonAnalysis.objects.create(**validated_data)
+        return common_analysis
 
     def get_patient_nom(self, obj):
-        """
-        Récupère le nom complet du patient s'il existe, sinon retourne "N/A".
-        """
-        if obj.patient:
-            return obj.patient.full_name
-        return "N/A"
+        return f"{obj.patient.nom} {obj.patient.prenoms}" if obj.patient else None
 
 
 class CholesterolAnalysisSerializer(serializers.ModelSerializer):

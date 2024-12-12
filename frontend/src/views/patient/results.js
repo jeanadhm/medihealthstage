@@ -1,96 +1,148 @@
-import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Typography,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  CircularProgress,
-} from "@mui/material";
+import React, { useEffect, useState } from 'react';
+import { Box, Typography, Paper, CircularProgress, List, ListItem, ListItemText, Snackbar, Alert } from '@mui/material';
 
-const MyResults = () => {
-  const [results, setResults] = useState([]);
+function MyResults() {
+  const [analyses, setAnalyses] = useState({
+    common_analyses: [],
+    cholesterol_analyses: [],
+    ist_analyses: [],
+    diabetes_analyses: []
+  });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
+  const [notification, setNotification] = useState({ open: false, message: '', severity: '' });
 
-  // Récupérer les résultats des analyses du patient connecté
   useEffect(() => {
-    const fetchResults = async () => {
-      const patientId = localStorage.getItem("patientId");
-      if (!patientId) {
-        setError("ID du patient non trouvé dans le localStorage.");
+    const fetchAnalyses = async () => {
+      const patientId = localStorage.getItem('patientId');
+      const accessToken = localStorage.getItem('accessToken');
+
+      if (!patientId || !accessToken) {
+        setError('Erreur : patient ou token non identifié.');
         setLoading(false);
         return;
       }
 
       try {
-        const response = await fetch(
-          `http://127.0.0.1:8000/analyses/all/${patientId}/`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setResults(data);
-        } else {
-          const errorData = await response.json();
-          setError(errorData.detail || "Erreur lors de la récupération des analyses.");
+        const response = await fetch(`http://127.0.0.1:8000/analyses/all/${patientId}/type/patient/`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        if (response.status === 401) {
+          setError('Session expirée. Veuillez vous reconnecter.');
+          setLoading(false);
+          return;
         }
+
+        if (!response.ok) {
+          throw new Error('Impossible de charger vos analyses.');
+        }
+
+        const data = await response.json();
+        setAnalyses(data);
       } catch (err) {
-        setError("Erreur réseau. Veuillez réessayer plus tard.");
+        setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchResults();
+    fetchAnalyses();
   }, []);
 
-  return (
-    <Paper
-      elevation={3}
-      sx={{
-        maxWidth: 800,
-        margin: "auto",
-        padding: 4,
-        mt: 12,
-        backgroundColor: "#f9f9f9",
-      }}
-    >
-      <Typography
-        variant="h5"
-        gutterBottom
-        align="center"
-        sx={{ color: "#1e88e5" }}
-      >
-        Mes Résultats d'Analyses
+  const renderAnalyses = (title, analysisList) => (
+    <Box sx={{ marginTop: 2 }}>
+      <Typography variant="h6" sx={{ color: '#cbd5e1', marginBottom: 1 }}>
+        {title}
       </Typography>
-
-      {loading ? (
-        <Box display="flex" justifyContent="center" mt={4}>
-          <CircularProgress />
-        </Box>
-      ) : error ? (
-        <Typography variant="body1" color="error" align="center">
-          {error}
-        </Typography>
-      ) : results.length === 0 ? (
-        <Typography variant="body1" align="center">
-          Aucun résultat d'analyse trouvé.
+      {analysisList.length === 0 ? (
+        <Typography variant="body2" sx={{ color: '#94a3b8' }}>
+          Aucune analyse disponible.
         </Typography>
       ) : (
         <List>
-          {results.map((result) => (
-            <ListItem key={result.id} divider>
+          {analysisList.map((analysis, index) => (
+            <ListItem
+              key={index}
+              sx={{
+                borderBottom: '1px solid #64748b',
+                '&:last-child': { borderBottom: 'none' },
+              }}
+            >
               <ListItemText
-                primary={result.title || "Analyse sans titre"}
-                secondary={`Date: ${new Date(result.date).toLocaleDateString()} - Résultat: ${result.result}`}
+                primary={`Type : ${analysis.type || 'Non spécifié'}`}
+                secondary={
+                  <>
+                    <Typography component="span" variant="body2" sx={{ display: 'block', color: '#94a3b8' }}>
+                      Date : {analysis.date || 'Non spécifiée'}
+                    </Typography>
+                    <Typography component="span" variant="body2" sx={{ display: 'block', color: '#94a3b8' }}>
+                      Résultat : {analysis.result || 'Non disponible'}
+                    </Typography>
+                  </>
+                }
               />
             </ListItem>
           ))}
         </List>
       )}
-    </Paper>
+    </Box>
   );
-};
+
+  return (
+    <Box sx={{ maxWidth: 800, margin: 'auto', padding: 4, mt: 10 }}>
+      <Paper
+        elevation={3}
+        sx={{
+          padding: 3,
+          backgroundColor: '#1e293b',
+          color: '#cbd5e1',
+        }}
+      >
+        <Typography variant="h5" align="center" sx={{ marginBottom: 2, color: '#cbd5e1' }}>
+          Mes Analyses
+        </Typography>
+
+        {loading && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 4 }}>
+            <CircularProgress color="inherit" />
+          </Box>
+        )}
+
+        {!loading && error && (
+          <Typography variant="body1" color="error" align="center">
+            {error}
+          </Typography>
+        )}
+
+        {!loading && !error && (
+          <>
+            {renderAnalyses('Analyses Générales', analyses.common_analyses)}
+            {renderAnalyses('Analyses Cholestérol', analyses.cholesterol_analyses)}
+            {renderAnalyses('Analyses IST', analyses.ist_analyses)}
+            {renderAnalyses('Analyses Diabète', analyses.diabetes_analyses)}
+          </>
+        )}
+      </Paper>
+
+      {/* Notifications */}
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={6000}
+        onClose={() => setNotification({ ...notification, open: false })}
+      >
+        <Alert
+          onClose={() => setNotification({ ...notification, open: false })}
+          severity={notification.severity}
+          sx={{ width: '100%' }}
+        >
+          {notification.message}
+        </Alert>
+      </Snackbar>
+    </Box>
+  );
+}
 
 export default MyResults;

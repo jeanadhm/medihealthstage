@@ -175,12 +175,12 @@ const styles = {
         padding: '10px',
         overflowY: 'auto',
     },
-    patientList: {
+    doctorList: {
         listStyleType: 'none',
         padding: 0,
         margin: 0,
     },
-    patientItem: {
+    doctorItem: {
         padding: '10px',
         cursor: 'pointer',
         borderBottom: '1px solid #eee',
@@ -203,22 +203,20 @@ const styles = {
         height: '70%',
     },
     sentMessage: {
-        alignSelf: 'flex-right', // Align message to the right
+        alignSelf: 'flex-end',
         backgroundColor: '#d1e7ff',
         padding: '10px',
         marginBottom: '5px',
         borderRadius: '10px',
         maxWidth: '60%',
-        textAlign: 'right', // Align text to the right for sent messages
     },
     receivedMessage: {
-        alignSelf: 'flex-start', // Align message to the left
+        alignSelf: 'flex-start',
         backgroundColor: '#f1f1f1',
         padding: '10px',
         marginBottom: '5px',
         borderRadius: '10px',
         maxWidth: '60%',
-        textAlign: 'left', // Align text to the left for received messages
     },
     text: {
         margin: 0,
