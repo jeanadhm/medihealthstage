@@ -39,13 +39,16 @@
     "slick-carousel": "^1.8.1",
     "tailwindcss": "^2.2.19"
   },
+  "homepage": "https://jeanadhm.github.io/medihealthstage",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build && gulp licenses",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm run build:tailwind && npm start",
-    "build:tailwind": "tailwind build src/assets/styles/index.css -o src/assets/styles/tailwind.css"
+    "build:tailwind": "tailwind build src/assets/styles/index.css -o src/assets/styles/tailwind.css",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -66,6 +69,7 @@
     "typescript": "4.2.3"
   },
   "devDependencies": {
+    "gh-pages": "^6.2.0",
     "source-map-loader": "^5.0.0",
     "webpack": "^5.96.1",
     "webpack-cli": "^5.1.4"
